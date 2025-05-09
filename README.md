@@ -138,7 +138,6 @@ deer-picture-hunting-game/
 
 ## Known Issues
 
-- Terrain texture tiling pattern is visible
 - Heightmap could use more definition for better terrain features
 - No trees or other environment objects yet
 - Collision is limited to a simple ground plane
