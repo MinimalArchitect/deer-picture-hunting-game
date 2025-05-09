@@ -172,3 +172,17 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Panda3D specific
+*.bam
+*.egg-log
+*.pz
+
+# Game assets backup files
+*.blend1
+*.blend2
+*.backup
