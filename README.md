@@ -2,7 +2,7 @@
 
 A 3D game where players hunt for deer photographs in a forest environment. This game is being developed as part of the Advanced Object-Oriented Programming course at TU Wien.
 
-![Game Screenshot](raw/main/screenshots/week1.png)
+![Game Screenshot](<img src="raw/main/screenshots/week1.png" alt="Game Screenshot" width="400"/>)
 
 ## Current game plan:
 
