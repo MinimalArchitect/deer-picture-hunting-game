@@ -2,7 +2,7 @@
 
 A 3D game where players hunt for deer photographs in a forest environment. This game is being developed as part of the Advanced Object-Oriented Programming course at TU Wien.
 
-![Game Screenshot](https://github.com/MinimalArchitect/deer-picture-hunting-game/raw/main/screenshots/week1.png)
+![Game Screenshot](raw/main/screenshots/week1.png)
 
 ## Current game plan:
 
