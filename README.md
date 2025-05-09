@@ -63,8 +63,7 @@ We have implemented the core game engine with:
 
 3. Install dependencies:
    ```bash
-   pip install panda3d
-   pip install numpy  # For future physics calculations
+   pip install -r requirements.txt
    ```
 
 4. Ensure you have the required assets:
