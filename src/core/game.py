@@ -10,40 +10,36 @@ from src.entities.player import Player
 from src.physics.terrain import Terrain
 from src.entities.deer import Deer
 
+USE_PANDA_ENVIRONMENT = True
+
 
 class DeerHuntingGame(ShowBase):
     """Main game class for the Deer Picture Hunting Game"""
 
     def __init__(self):
-        """Initialize the game"""
         ShowBase.__init__(self)
 
-        # Set window properties
         self.set_window_properties()
 
-        # Set up collision system
         self.setup_collision()
 
-        # Set up lighting
         self.setup_lighting()
 
         getModelPath().appendDirectory(Filename.fromOsSpecific("assets"))
 
-        # Create terrain
-        self.terrain = Terrain(self)
+        if USE_PANDA_ENVIRONMENT:
+            self.load_environment()
+        else:
+            self.terrain = Terrain(self)
 
-        # Create player
         self.player = Player(self, Vec3(0, 0, 3))
 
-        # Create deer
         self.deer_list = []
         self.spawn_deer()
 
         self.setBackgroundColor(0.6, 0.8, 1.0)  # Light blue sky
-
         self.render.setShaderAuto()  # Enable automatic shaders
 
-        # Display instructions
         self.display_instructions()
 
     def set_window_properties(self):
@@ -73,27 +69,19 @@ class DeerHuntingGame(ShowBase):
         self.cTrav = CollisionTraverser()
         self.pusher = CollisionHandlerPusher()
 
+    def load_environment(self):
+        """Load trees and rocks environment model"""
+        environment = self.loader.loadModel("models/environment.egg")
+        environment.reparentTo(self.render)
+        environment.setScale(0.25, 0.25, 0.25)
+        environment.setPos(-8, 42, 0)
+
     def spawn_deer(self):
         """Spawn deer entities at fixed positions"""
         positions = [Vec3(10, 10, 0), Vec3(-15, 25, 0), Vec3(20, -20, 0)]
         for pos in positions:
             deer = Deer(self, pos)
             self.deer_list.append(deer)
-
-    def setup_skybox(self):
-        """Create a simple skybox"""
-        # Load a sky sphere model
-        self.sky = self.loader.loadModel("models/sky_sphere")
-        self.sky.setScale(10000)  # Make it big enough to encompass the scene
-
-        # Use a simple blue texture for the sky
-        sky_tex = self.loader.loadTexture("assets/textures/sky.jpg")
-        self.sky.setTexture(sky_tex, 1)
-
-        # Attach it to the camera so it moves with the view
-        self.sky.reparentTo(self.render)
-        self.sky.setBin("background", 0)
-        self.sky.setDepthWrite(False)
 
     def display_instructions(self):
         """Display game instructions on the screen"""
@@ -106,7 +94,7 @@ class DeerHuntingGame(ShowBase):
             "ESC: Pause/Menu"
         ]
 
-        self.instruction_text = OnscreenText(
+        OnscreenText(
             text="\n".join(instructions),
             pos=(-0.95, 0.8),
             scale=0.07,
