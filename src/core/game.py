@@ -6,8 +6,11 @@ from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import WindowProperties, AmbientLight, DirectionalLight, getModelPath, Filename
 from panda3d.core import Vec3, Vec4, CollisionTraverser, CollisionHandlerPusher, TextNode
 
+from src.core.game_state import GameState
 from src.entities.player import Player
 from src.physics.terrain import Terrain
+from src.ui.pause_menu import PauseMenu
+
 from src.entities.deer import Deer
 
 USE_PANDA_ENVIRONMENT = True
@@ -20,6 +23,10 @@ class DeerHuntingGame(ShowBase):
         ShowBase.__init__(self)
 
         self.set_window_properties()
+
+
+        self.game_state = GameState(self)
+        self.pause_menu = PauseMenu(self.game_state)
 
         self.setup_collision()
 
