@@ -18,14 +18,14 @@ class PauseMenu:
 
         self.pause_label = DirectLabel(
             parent=self.pause_frame,
-            text="Pause Menü",
+            text="Pause menu",
             scale=0.1,
             pos=(0, 0, 0.2)
         )
 
         self.resume_button = DirectButton(
             parent=self.pause_frame,
-            text="Fortsetzen",
+            text="Continue",
             scale=0.08,
             pos=(0, 0, 0),
             command=self.toggle_pause
@@ -33,7 +33,7 @@ class PauseMenu:
 
         self.exit_button = DirectButton(
             parent=self.pause_frame,
-            text="Beenden",
+            text="Quit",
             scale=0.08,
             pos=(0, 0, -0.2),
             command=self.quit_game
