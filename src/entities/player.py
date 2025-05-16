@@ -3,7 +3,7 @@ Player class that handles movement and actions
 """
 from direct.showbase.ShowBaseGlobal import globalClock
 from direct.task import Task
-from panda3d.core import Vec3, CollisionSphere, CollisionNode
+from panda3d.core import Vec3, CollisionSphere, CollisionNode, BitMask32
 
 from src.entities.game_object import GameObject
 from src.core.camera_controller import CameraController
@@ -57,6 +57,9 @@ class Player(GameObject):
         # Add to traverser and handler
         self.base.cTrav.addCollider(self.collision_np, self.base.pusher)
         self.base.pusher.addCollider(self.collision_np, self.collision_np)
+
+        collision_node.setFromCollideMask(BitMask32.bit(1))
+        collision_node.setIntoCollideMask(BitMask32.allOff())
 
     def setup_controls(self):
         """Set up keyboard and mouse controls"""
@@ -122,6 +125,9 @@ class Player(GameObject):
 
         # Update position
         self.position = new_pos
+
+        self.apply_gravity(dt)
+
         self.collision_np.setPos(self.position)
 
         # Update camera position (keep height constant)

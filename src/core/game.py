@@ -13,7 +13,7 @@ from src.ui.pause_menu import PauseMenu
 
 from src.entities.deer import Deer
 
-USE_PANDA_ENVIRONMENT = True
+USE_PANDA_ENVIRONMENT = False
 
 
 class DeerHuntingGame(ShowBase):
@@ -24,6 +24,10 @@ class DeerHuntingGame(ShowBase):
 
         self.set_window_properties()
 
+        if USE_PANDA_ENVIRONMENT:
+            self.load_environment()
+        else:
+            self.terrain = Terrain(self)
 
         self.game_state = GameState(self)
         self.pause_menu = PauseMenu(self.game_state)
@@ -33,11 +37,6 @@ class DeerHuntingGame(ShowBase):
         self.setup_lighting()
 
         getModelPath().appendDirectory(Filename.fromOsSpecific("assets"))
-
-        if USE_PANDA_ENVIRONMENT:
-            self.load_environment()
-        else:
-            self.terrain = Terrain(self)
 
         self.player = Player(self, Vec3(0, 0, 3))
 
@@ -85,7 +84,7 @@ class DeerHuntingGame(ShowBase):
 
     def spawn_deer(self):
         """Spawn deer entities at fixed positions"""
-        positions = [Vec3(10, 10, 0), Vec3(-15, 25, 0), Vec3(20, -20, 0)]
+        positions = [Vec3(10, 10, 10), Vec3(-15, 25, 10), Vec3(20, -20, 10)]
         for pos in positions:
             deer = Deer(self, pos)
             self.deer_list.append(deer)

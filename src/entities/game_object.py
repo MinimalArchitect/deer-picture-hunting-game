@@ -9,6 +9,9 @@ class GameObject:
         self.position = position or Vec3(0, 0, 0)
         self.node_path = None
 
+        self.velocity_z = 0.0
+        self.gravity = -9.8  # units/sec²
+
         if model_path:
             self.load_model(model_path)
 
@@ -31,3 +34,16 @@ class GameObject:
         """Remove the object from the scene"""
         if self.node_path and not self.node_path.isEmpty():
             self.node_path.removeNode()
+
+    def apply_gravity(self, dt):
+        """Applies gravity and clamps object to terrain"""
+        terrain = self.base.terrain
+        ground_z = terrain.get_elevation(self.position.x, self.position.y)
+
+        self.velocity_z += self.gravity * dt
+        self.position.z += self.velocity_z * dt
+
+        # Clamp to ground
+        if self.position.z < ground_z:
+            self.position.z = ground_z
+            self.velocity_z = 0.0
