@@ -1,47 +1,60 @@
-# Deer Picture Hunting Game
+# Deer Picture Hunting Game (2D Grid-Based Version)
 
-A 3D game where players hunt for deer photographs in a forest environment. This game is being developed as part of the Advanced Object-Oriented Programming course at TU Wien. 
+<table>
+  <tr>
+    <td><img src="screenshots/main-menu.png" width="230"/></td>
+    <td><img src="screenshots/game_preview-1.png" width="230"/></td>
+  </tr>
+  <tr>
+    <td align="center">Main Menu</td>
+    <td align="center">Gameplay 1</td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/game_preview-2.png" width="230"/></td>
+    <td><img src="screenshots/game-over-screen.png" width="230"/></td>
+  </tr>
+  <tr>
+    <td align="center">Gameplay 2</td>
+    <td align="center">Game Over</td>
+  </tr>
+</table>
 
-For 2d version click [here](2d/README.md)
+A simplified 2D grid-based implementation of the Deer Picture Hunting Game developed for the Advanced Object-Oriented Programming course at TU Wien.
 
-<img src="raw/main/screenshots/week1.png" alt="Game Screenshot" width="500"/>
+## Table of Contents
 
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [How to Play](#how-to-play)
+- [Implementation Details](#implementation-details)
+- [Code Structure](#code-structure)
+- [Development Timeline](#development-timeline)
+- [Assignment Context](#assignment-context)
 
-## Project Overview
+## Overview
 
-Deer Picture Hunting Game is a 3D first-person photography game where players take pictures of deer in a forest environment. The game will feature:
+Deer Picture Hunting Game is a grid-based 2D game where you play as a wildlife photographer attempting to take pictures of deer in a forest environment. The deer react to your presence, attempting to flee when you get too close. Navigate the environment carefully, avoid alerting the deer, and capture as many unique photographs as possible before time runs out.
 
-- First-person camera controls
-- Realistic deer AI with smell and sight detection
-- Various terrain and environments
-- Scoring system for photographs
-- Multiplayer capabilities in the final version
+This version uses a simplified grid-based approach to focus on the core game mechanics and object-oriented programming principles rather than complex graphics and physics.
 
-This project is being developed in three phases, each using a different programming language:
-1. Python with Panda3D (Current phase)
-2. Smalltalk implementation
-3. Eiffel implementation
+## Features
 
-## Implementation Status
+- **Main Menu System**: Options for single player, hosting, joining, and configuring the game
+- **Grid-based Movement System**: Navigate through the forest using the arrow keys
+- **Dynamic Deer AI**: Deer that react to the player's presence and movement
+- **Photography Mechanics**: Take pictures in the direction you're facing
+- **Varied Environment**: Forest with trees, rocks, and bushes that affect movement and visibility
+- **Scoring System**: Points awarded for unique deer photographs
+- **Timer-based Gameplay**: Limited time to take as many pictures as possible
 
-**Current Version: Week 1 - Core Setup**
-
-We have implemented the core game engine with:
-- 3D terrain rendering
-- First-person camera controls
-- Basic movement mechanics
-- Collision detection
-- Photography mechanic (basic implementation)
-- Development environment configuration
-
-## Installation and Setup
+## Installation
 
 ### Prerequisites
 - Python 3.8 or higher
-- Git
-- Panda3D 1.10.x
+- Pygame library
 
-### Steps
+### Setup
 
 1. Clone the repository:
    ```bash
@@ -49,7 +62,7 @@ We have implemented the core game engine with:
    cd deer-picture-hunting-game
    ```
 
-2. Create and activate a virtual environment:
+2. Create and activate a virtual environment (recommended):
    ```bash
    # Windows
    python -m venv venv
@@ -60,104 +73,85 @@ We have implemented the core game engine with:
    source venv/bin/activate
    ```
 
-3. Install dependencies:
+3. Install required packages:
    ```bash
-   pip install -r requirements.txt
+   pip install pygame
    ```
 
-4. Ensure you have the required assets:
-   - Create `assets/textures` directory if it doesn't exist
-   - Add a seamless grass texture named `grass.jpg`
-   - Add a heightmap image named `heightmap.png` (257x257 pixels recommended)
+4. Run the game:
+   ```bash
+   python 2d/main.py
+   ```
 
-## Running the Game
+## How to Play
 
-To start the game in development mode:
+- **Main Menu**: Click on options with your mouse
+- **Arrow Keys**: Move your photographer (blue triangle) around the map
+- **Space**: Take a picture in the direction you're facing
+- **ESC**: Return to main menu
+- **Goal**: Photograph as many unique deer as possible before time runs out
+- **Scoring**: Each unique deer photographed awards 1 point
 
-```bash
-# From the project root
-python tests/test_game.py
+### Environment Elements
 
-# Or alternatively
-python src/main.py
+- **Green Squares**: Trees (block movement and vision)
+- **Gray Squares**: Rocks (block movement and vision)
+- **Light Green Squares**: Bushes (allow movement but reduce visibility)
+- **Brown Circles**: Deer (your photography targets)
+- **Blue Triangle**: Player (points in the direction you're facing)
+
+## Implementation Details
+
+The game is implemented using Pygame and employs object-oriented programming principles:
+
+- **Inheritance**: All game entities inherit from a base GameObject class
+- **Encapsulation**: Game state and behavior are encapsulated within appropriate classes
+- **Polymorphism**: Different entities implement their own draw() and update() methods
+- **Abstraction**: Complex behaviors are abstracted into methods
+
+The game uses a simple grid-based collision system and implements basic AI for the deer to detect and flee from the player.
+
+## Code Structure
+
+```
+2d/
+├── assets/          # Game assets (if any)
+├── docs/            # Other readme files and documentation
+├── screenshots/     # Game play screenshots
+├── README.md        # Main readme file
+├── main.py          # Main game file containing all classes and game loop
+    
 ```
 
-### Controls
+### Classes Overview
 
-- **W, A, S, D**: Move forward, left, backward, right
-- **Mouse**: Look around
-- **Left-click**: Take picture
-- **Right-click (hold)**: Zoom in
-- **ESC**: Pause/Menu (not implemented yet)
-
-## Project Structure
-
-```
-deer-picture-hunting-game/
-├── src/                    # Source code
-│   ├── core/               # Core game systems
-│   │   ├── game.py         # Main game class
-│   │   └── camera_controller.py  # Camera handling
-│   ├── entities/           # Game entities
-│   │   ├── game_object.py  # Base object class
-│   │   └── player.py       # Player implementation
-│   ├── physics/            # Physics systems
-│   │   └── terrain.py      # Terrain generation
-│   ├── ui/                 # User interface (future)
-│   └── networking/         # Networking code (future)
-├── assets/                 # Game assets
-│   ├── models/             # 3D models
-│   ├── textures/           # Texture files
-│   └── sounds/             # Sound effects (future)
-├── tests/                  # Test scripts
-│   └── test_game.py        # Basic game testing
-└── docs/                   # Documentation (future)
-```
-
-## Features
-
-### Implemented (Week 1)
-
-- **Core Engine Setup**: Based on Panda3D with Python
-- **Terrain System**: Heightmap-based terrain with texture mapping
-- **Camera Controls**: First-person view with mouse look
-- **Movement System**: WASD controls with collision detection
-- **Basic Photography**: Left-click to take pictures (console output only)
-- **Initial Texturing**: Applied textures to terrain
-- **Environment Setup**: Sky color and basic lighting
-
-### Planned (Upcoming Weeks)
-
-- **Deer AI**: Movement patterns, detection systems
-- **Environment**: Trees, rocks, water features
-- **Advanced Photography**: Line-of-sight checks, subject detection
-- **Scoring System**: Points for deer photographs
-- **UI Elements**: HUD, menus, score display
-- **Multiplayer Support**: Network-based gameplay
-
-## Known Issues
-
-- Heightmap could use more definition for better terrain features
-- No trees or other environment objects yet
-- Collision is limited to a simple ground plane
-- Photography system only prints to console
+- **GameObject**: Base class for all game objects
+- **Player**: Handles player movement, direction, and photography
+- **Deer**: Implements deer behavior, movement, and reaction to player
+- **GameMap**: Manages the game environment and obstacles
+- **Game**: Main game class that brings everything together
 
 ## Development Timeline
 
-| Week | Focus | Status |
-|------|-------|--------|
-| 1 | Core Setup | ✅ Completed |
-| 2 | Game Entities | 🚧 Planned |
-| 3 | Game Mechanics | 🚧 Planned |
-| 4 | Networking | 🚧 Planned |
-| 5 | Refinement | 🚧 Planned |
-| 6 | Finalization | 🚧 Planned |
+This 2D grid-based version represents the first phase of a three-part project:
 
-## Credits
+1. **Python Implementation (Current)**: Simplified 2D grid-based version
+2. **Smalltalk Implementation (Upcoming)**: Port of the game to Smalltalk
+3. **Eiffel Implementation (Upcoming)**: Final version implemented in Eiffel
 
-- **Panda3D**: 3D game engine - [https://www.panda3d.org/](https://www.panda3d.org/)
-- **Advanced Object-Oriented Programming Course**: TU Wien
+Each implementation aims to explore the object-oriented features of the respective language.
 
-## License
+For detailed development plan click [here](docs/development-roadmap.md)
 
-This project is created for educational purposes as part of the Advanced Object-Oriented Programming course at TU Wien.
+## Assignment Context
+
+This game is developed as part of the "Advanced Object-Oriented Programming" course at TU Wien. The assignment involves creating three versions of the same game in different object-oriented languages:
+
+1. A networked version in any OOP language (we chose Python with a simplified 2D approach)
+2. A simplified version in Smalltalk
+3. A version in Eiffel exploring its specific features
+
+
+---
+
+*Note: This README describes the simplified 2D grid-based version of the Deer Picture Hunting Game. Future implementations in Smalltalk and Eiffel will build upon the concepts established here.*
