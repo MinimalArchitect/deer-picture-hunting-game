@@ -1,6 +1,8 @@
 # Deer Picture Hunting Game
 
-A 3D game where players hunt for deer photographs in a forest environment. This game is being developed as part of the Advanced Object-Oriented Programming course at TU Wien.
+A 3D game where players hunt for deer photographs in a forest environment. This game is being developed as part of the Advanced Object-Oriented Programming course at TU Wien. 
+
+For 2d version click [here](2d/README.md)
 
 <img src="raw/main/screenshots/week1.png" alt="Game Screenshot" width="500"/>
 
