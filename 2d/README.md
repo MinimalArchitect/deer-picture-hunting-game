@@ -1,6 +1,8 @@
 # Deer Picture Hunting Game (2D Grid-Based Version)
 
 <img src="screenshots/game_preview.png" alt="Game Preview" width="600"/>
+<img src="screenshots/game_preview1.png" alt="Game Preview" width="600"/>
+<img src="screenshots/game_preview2.png" alt="Game Preview" width="600"/>
 
 A simplified 2D grid-based implementation of the Deer Picture Hunting Game developed for the Advanced Object-Oriented Programming course at TU Wien.
 
