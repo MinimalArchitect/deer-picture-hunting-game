@@ -12,6 +12,18 @@ class GameMap:
     def __init__(self):
         self.grid = [["EMPTY" for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
 
+        self.grass_image = pygame.image.load("assets/textures/grass.png").convert_alpha()
+        self.grass_image = pygame.transform.scale(self.grass_image, (GRID_SIZE, GRID_SIZE))
+
+        self.rock_image = pygame.image.load("assets/textures/rock.png").convert_alpha()
+        self.rock_image = pygame.transform.scale(self.rock_image, (GRID_SIZE, GRID_SIZE))
+
+        self.tree_image = pygame.image.load("assets/textures/tree.png").convert_alpha()
+        self.tree_image = pygame.transform.scale(self.tree_image, (GRID_SIZE, GRID_SIZE))
+
+        self.bush_image = pygame.image.load("assets/textures/bush.png").convert_alpha()
+        self.bush_image = pygame.transform.scale(self.bush_image, (GRID_SIZE, GRID_SIZE))
+
     def generate_map(self):
         """Generate a random map with trees, rocks, bushes"""
         # Add trees (20% of grid)
@@ -44,16 +56,14 @@ class GameMap:
         """Draw the map"""
         for x in range(GRID_WIDTH):
             for y in range(GRID_HEIGHT):
-                rect = (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+                pos = (x * GRID_SIZE, y * GRID_SIZE)
+
+                # Fill the whole grid with grass
+                surface.blit(self.grass_image, pos)
 
                 if self.grid[x][y] == "TREE":
-                    pygame.draw.rect(surface, GREEN, rect)
+                    surface.blit(self.tree_image, pos)
                 elif self.grid[x][y] == "ROCK":
-                    pygame.draw.rect(surface, (100, 100, 100), rect)
+                    surface.blit(self.rock_image, pos)
                 elif self.grid[x][y] == "BUSH":
-                    pygame.draw.rect(surface, (144, 238, 144), rect)  # Light green
-                else:
-                    pygame.draw.rect(surface, (200, 255, 200), rect)  # Light grass color
-
-                # Draw grid lines
-                pygame.draw.rect(surface, (220, 220, 220), rect, 1)
+                    surface.blit(self.bush_image, pos)

@@ -3,7 +3,6 @@ import random
 import pygame
 
 from src.entity.game_object import GameObject
-from src.util.color import BROWN
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
 
@@ -16,11 +15,13 @@ class Deer(GameObject):
         self.photographed = False
         self.alert_level = 0  # 0-10, higher means more likely to flee
 
+        self.deer_image = pygame.image.load("assets/textures/deer.png").convert_alpha()
+        self.deer_image = pygame.transform.scale(self.deer_image, (GRID_SIZE, GRID_SIZE))
+
     def draw(self, surface):
-        # Draw deer as brown circle
-        center_x = self.x * GRID_SIZE + GRID_SIZE // 2
-        center_y = self.y * GRID_SIZE + GRID_SIZE // 2
-        pygame.draw.circle(surface, BROWN, (center_x, center_y), GRID_SIZE // 2)
+        # Draw deer
+        pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
+        surface.blit(self.deer_image, pos)
 
     def update(self, player, game_map):
         """Update deer behavior based on player position"""

@@ -3,7 +3,6 @@ import random
 import pygame
 
 from src.entity.game_object import GameObject
-from src.util.color import BLUE
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
 
@@ -15,21 +14,31 @@ class Player(GameObject):
         self.direction = "UP"  # UP, DOWN, LEFT, RIGHT
         self.photos_taken = 0
 
+        self.hunter_up_image = pygame.image.load("assets/textures/hunter-back.png").convert_alpha()
+        self.hunter_up_image = pygame.transform.scale(self.hunter_up_image, (GRID_SIZE, GRID_SIZE))
+
+        self.hunter_down_image = pygame.image.load("assets/textures/hunter-front.png").convert_alpha()
+        self.hunter_down_image = pygame.transform.scale(self.hunter_down_image, (GRID_SIZE, GRID_SIZE))
+
+        self.hunter_right_image = pygame.image.load("assets/textures/hunter-right.png").convert_alpha()
+        self.hunter_right_image = pygame.transform.scale(self.hunter_right_image, (GRID_SIZE, GRID_SIZE))
+
+        self.hunter_left_image = pygame.image.load("assets/textures/hunter-left.png").convert_alpha()
+        self.hunter_left_image = pygame.transform.scale(self.hunter_left_image, (GRID_SIZE, GRID_SIZE))
+
     def draw(self, surface):
-        # Draw player as a triangle pointing in direction
-        center_x = self.x * GRID_SIZE + GRID_SIZE // 2
-        center_y = self.y * GRID_SIZE + GRID_SIZE // 2
+        # Draw player pointing in direction
+
+        pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
 
         if self.direction == "UP":
-            points = [(center_x, center_y - 10), (center_x - 7, center_y + 5), (center_x + 7, center_y + 5)]
+            surface.blit(self.hunter_up_image, pos)
         elif self.direction == "DOWN":
-            points = [(center_x, center_y + 10), (center_x - 7, center_y - 5), (center_x + 7, center_y - 5)]
+            surface.blit(self.hunter_down_image, pos)
         elif self.direction == "LEFT":
-            points = [(center_x - 10, center_y), (center_x + 5, center_y - 7), (center_x + 5, center_y + 7)]
+            surface.blit(self.hunter_left_image, pos)
         else:  # RIGHT
-            points = [(center_x + 10, center_y), (center_x - 5, center_y - 7), (center_x - 5, center_y + 7)]
-
-        pygame.draw.polygon(surface, BLUE, points)
+            surface.blit(self.hunter_right_image, pos)
 
     def move(self, dx, dy, game_map):
         """Try to move in the specified direction"""
