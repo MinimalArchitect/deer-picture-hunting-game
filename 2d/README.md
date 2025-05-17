@@ -1,8 +1,23 @@
 # Deer Picture Hunting Game (2D Grid-Based Version)
 
-<img src="screenshots/game_preview.png" alt="Game Preview" width="600"/>
-<img src="screenshots/game_preview1.png" alt="Game Preview" width="600"/>
-<img src="screenshots/game_preview2.png" alt="Game Preview" width="600"/>
+<table>
+  <tr>
+    <td><img src="screenshots/main-menu.png" width="230"/></td>
+    <td><img src="screenshots/game_preview-1.png" width="230"/></td>
+  </tr>
+  <tr>
+    <td align="center">Main Menu</td>
+    <td align="center">Gameplay 1</td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/game_preview-2.png" width="230"/></td>
+    <td><img src="screenshots/game-over-screen.png" width="230"/></td>
+  </tr>
+  <tr>
+    <td align="center">Gameplay 2</td>
+    <td align="center">Game Over</td>
+  </tr>
+</table>
 
 A simplified 2D grid-based implementation of the Deer Picture Hunting Game developed for the Advanced Object-Oriented Programming course at TU Wien.
 
@@ -25,6 +40,7 @@ This version uses a simplified grid-based approach to focus on the core game mec
 
 ## Features
 
+- **Main Menu System**: Options for single player, hosting, joining, and configuring the game
 - **Grid-based Movement System**: Navigate through the forest using the arrow keys
 - **Dynamic Deer AI**: Deer that react to the player's presence and movement
 - **Photography Mechanics**: Take pictures in the direction you're facing
@@ -69,8 +85,10 @@ This version uses a simplified grid-based approach to focus on the core game mec
 
 ## How to Play
 
+- **Main Menu**: Click on options with your mouse
 - **Arrow Keys**: Move your photographer (blue triangle) around the map
 - **Space**: Take a picture in the direction you're facing
+- **ESC**: Return to main menu
 - **Goal**: Photograph as many unique deer as possible before time runs out
 - **Scoring**: Each unique deer photographed awards 1 point
 
