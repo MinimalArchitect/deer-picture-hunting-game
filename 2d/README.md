@@ -16,7 +16,6 @@ A simplified 2D grid-based implementation of the Deer Picture Hunting Game devel
 - [Code Structure](#code-structure)
 - [Development Timeline](#development-timeline)
 - [Assignment Context](#assignment-context)
-- [Credits](#credits)
 
 ## Overview
 
