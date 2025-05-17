@@ -6,9 +6,6 @@ For 2d version click [here](2d/README.md)
 
 <img src="raw/main/screenshots/week1.png" alt="Game Screenshot" width="500"/>
 
-## Current game plan:
-
-- [Game Plan](deer-hunting-game-plan.md)
 
 ## Project Overview
 
