@@ -1,6 +1,7 @@
 import pygame
 
 from src.ui.button import Button
+from src.util.color import BLACK
 from src.util.config import WINDOW_WIDTH
 
 
@@ -10,7 +11,6 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.clock = pygame.time.Clock()
-        self.running = True
         self.current_menu = "main"  # main, options, high_scores
 
         # Define colors

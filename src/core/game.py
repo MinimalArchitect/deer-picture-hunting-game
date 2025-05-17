@@ -5,10 +5,17 @@ import pygame
 
 from src.core.game_map import GameMap
 from src.entity.deer import Deer
-from src.entity.player import Player
+from src.entity.player import Player, Direction
 from src.ui.menu import Menu
 from src.util.color import BLACK, WHITE
 from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
+
+
+class GameState:
+    """Enum for game states"""
+    MENU = "menu"
+    PLAYING = "playing"
+    GAME_OVER = "game_over"
 
 
 class Game:
@@ -19,8 +26,7 @@ class Game:
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Deer Picture Hunting")
         self.clock = pygame.time.Clock()
-        self.running = True
-        self.game_state = "menu"  # Can be "menu", "playing", "game_over"
+        self.game_state = GameState.MENU
 
         # Create menu
         self.menu = Menu(self.screen)
@@ -32,6 +38,8 @@ class Game:
         self.score = 0
         self.time_left = 60
         self.last_time = time.time()
+
+        self.quit_game = False
 
     def initialize_game(self):
         """Set up the game objects when starting a new game"""
@@ -51,8 +59,7 @@ class Game:
         self.score = 0
         self.time_left = 60  # 60 seconds
         self.last_time = time.time()
-        self.running = True
-        self.game_state = "playing"
+        self.game_state = GameState.PLAYING
 
     def place_in_empty_cell(self, object_class):
         """Place a new object in a random empty cell"""
@@ -65,29 +72,29 @@ class Game:
 
     def handle_events(self):
         """Handle pygame events"""
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                self.quit_game = False
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    self.player.direction = "UP"
+                    self.player.direction = Direction.UP
                     self.player.move(0, -1, self.map)
                 elif event.key == pygame.K_DOWN:
-                    self.player.direction = "DOWN"
+                    self.player.direction = Direction.DOWN
                     self.player.move(0, 1, self.map)
                 elif event.key == pygame.K_LEFT:
-                    self.player.direction = "LEFT"
+                    self.player.direction = Direction.LEFT
                     self.player.move(-1, 0, self.map)
                 elif event.key == pygame.K_RIGHT:
-                    self.player.direction = "RIGHT"
+                    self.player.direction = Direction.RIGHT
                     self.player.move(1, 0, self.map)
                 elif event.key == pygame.K_SPACE:
                     self.take_photo()
                 elif event.key == pygame.K_ESCAPE:
                     # Return to menu on escape
-                    self.running = False
-                    self.game_state = "menu"
+                    self.game_active = GameState.MENU
 
     def take_photo(self):
         """Player takes a photo"""
@@ -105,8 +112,6 @@ class Game:
         self.last_time = current_time
 
         self.time_left -= elapsed
-        if self.time_left <= 0:
-            self.running = False
 
         # Update deer
         for deer in self.deer:
@@ -140,179 +145,156 @@ class Game:
 
     def run(self):
         """Main game loop"""
-        # Main program loop
-        quit_game = False
-
-        while not quit_game:
-            # MENU STATE
-            if self.game_state == "menu":
-                # Clear event queue before entering menu
-                pygame.event.clear()
-
-                # Run menu
-                menu_choice = None
-                menu_active = True
-
-                while menu_active and not quit_game:
-                    # Process events
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            quit_game = True
-
-                        # Handle menu selection
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            mouse_pos = pygame.mouse.get_pos()
-                            # Check button clicks
-                            for i, button in enumerate(self.menu.main_buttons):
-                                if button.is_clicked(mouse_pos, True):
-                                    if i == 0:  # Single Player
-                                        menu_choice = "single_player"
-                                        menu_active = False
-                                    elif i == 1:  # Host Game
-                                        menu_choice = "host_game"
-                                        menu_active = False
-                                    elif i == 2:  # Join Game
-                                        menu_choice = "join_game"
-                                        menu_active = False
-                                    elif i == 3:  # Options
-                                        self.menu.current_menu = "options"
-                                    elif i == 4:  # High Scores
-                                        self.menu.current_menu = "high_scores"
-                                    elif i == 5:  # Exit
-                                        quit_game = True
-
-                    # Draw menu
-                    if not quit_game:
-                        self.screen.fill(self.menu.bg_color)
-
-                        # Draw title
-                        title_text = self.menu.title_font.render("Deer Picture Hunting", True, BLACK)
-                        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
-                        self.screen.blit(title_text, title_rect)
-
-                        # Draw version text
-                        version_font = pygame.font.SysFont(None, 24)
-                        version_text = version_font.render("2D Grid-Based Version", True, BLACK)
-                        version_rect = version_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
-                        self.screen.blit(version_text, version_rect)
-
-                        if self.menu.current_menu == "main":
-                            # Draw buttons
-                            for button in self.menu.main_buttons:
-                                button.check_hover(pygame.mouse.get_pos())
-                                button.draw(self.screen)
-                        elif self.menu.current_menu == "options":
-                            self.menu.draw_options()
-                        elif self.menu.current_menu == "high_scores":
-                            self.menu.draw_high_scores()
-
-                        pygame.display.flip()
-
-                    # Control frame rate
-                    self.clock.tick(30)
-
-                # Handle menu choice
-                if menu_choice in ["single_player", "host_game", "join_game"]:
-                    self.initialize_game()
-                    self.game_state = "playing"
-
-            # PLAYING STATE
-            elif self.game_state == "playing":
-                # Game loop
-                self.game_active = True
-                while self.game_active and not quit_game:
-                    # Process events
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            quit_game = True
-
-                        elif event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_UP:
-                                self.player.direction = "UP"
-                                self.player.move(0, -1, self.map)
-                            elif event.key == pygame.K_DOWN:
-                                self.player.direction = "DOWN"
-                                self.player.move(0, 1, self.map)
-                            elif event.key == pygame.K_LEFT:
-                                self.player.direction = "LEFT"
-                                self.player.move(-1, 0, self.map)
-                            elif event.key == pygame.K_RIGHT:
-                                self.player.direction = "RIGHT"
-                                self.player.move(1, 0, self.map)
-                            elif event.key == pygame.K_SPACE:
-                                self.take_photo()
-                            elif event.key == pygame.K_ESCAPE:
-                                self.game_active = False
-                                self.game_state = "menu"
-
-                    if not self.game_active:
-                        continue
-
-                    # Update game
-                    current_time = time.time()
-                    elapsed = current_time - self.last_time
-                    self.last_time = current_time
-
-                    self.time_left -= elapsed
-                    if self.time_left <= 0:
-                        self.game_active = False
-                        self.game_state = "game_over"
-
-                    # Update deer
-                    for deer in self.deer:
-                        deer.update(self.player, self.map)
-
-                    # Draw everything
-                    self.screen.fill(WHITE)
-                    self.map.draw(self.screen)
-                    for deer in self.deer:
-                        deer.draw(self.screen)
-                    self.player.draw(self.screen)
-
-                    # Draw UI
-                    font = pygame.font.SysFont(None, 36)
-                    score_text = font.render(f"Score: {self.score}", True, BLACK)
-                    time_text = font.render(f"Time: {int(self.time_left)}s", True, BLACK)
-                    self.screen.blit(score_text, (10, 10))
-                    self.screen.blit(time_text, (WINDOW_WIDTH - 150, 10))
-
-                    pygame.display.flip()
-                    self.clock.tick(30)
-
-            # GAME OVER STATE
-            elif self.game_state == "game_over":
-                # Game over screen
-                game_over_active = True
-
-                # Clear event queue before showing game over screen
-                pygame.event.clear()
-
-                while game_over_active and not quit_game:
-                    # Process events
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            quit_game = True
-                        elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                            game_over_active = False
-                            self.game_state = "menu"
-
-                    # Draw game over screen
-                    self.screen.fill(WHITE)
-
-                    font = pygame.font.SysFont(None, 72)
-                    game_over_text = font.render("GAME OVER", True, BLACK)
-                    final_score = font.render(f"Final Score: {self.score}", True, BLACK)
-
-                    # Add instructions
-                    instructions_font = pygame.font.SysFont(None, 32)
-                    instructions = instructions_font.render("Press any key to continue", True, BLACK)
-
-                    self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
-                    self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
-                    self.screen.blit(instructions, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 80))
-
-                    pygame.display.flip()
-                    self.clock.tick(30)
+        while not self.quit_game:
+            match self.game_state:
+                case GameState.MENU:
+                    self.handle_menu_state()
+                case GameState.PLAYING:
+                    self.handle_playing_state()
+                case GameState.GAME_OVER:
+                    self.handle_game_over_state()
 
         # Quit pygame
         pygame.quit()
+
+    def handle_menu_state(self):
+        # Clear event queue before entering menu
+        pygame.event.clear()
+
+        # Run menu
+        menu_choice = None
+        menu_active = True
+        while menu_active and not self.quit_game:
+            # Process events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game = True
+
+                # Handle menu selection
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    # Check button clicks
+                    for i, button in enumerate(self.menu.main_buttons):
+                        if button.is_clicked(mouse_pos, True):
+                            if i == 0:  # Single Player
+                                menu_choice = "single_player"
+                                menu_active = False
+                            elif i == 1:  # Host Game
+                                menu_choice = "host_game"
+                                menu_active = False
+                            elif i == 2:  # Join Game
+                                menu_choice = "join_game"
+                                menu_active = False
+                            elif i == 3:  # Options
+                                self.menu.current_menu = "options"
+                            elif i == 4:  # High Scores
+                                self.menu.current_menu = "high_scores"
+                            elif i == 5:  # Exit
+                                self.quit_game = True
+
+            # Draw menu
+            if not self.quit_game:
+                self.screen.fill(self.menu.bg_color)
+
+                # Draw title
+                title_text = self.menu.title_font.render("Deer Picture Hunting", True, BLACK)
+                title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
+                self.screen.blit(title_text, title_rect)
+
+                # Draw version text
+                version_font = pygame.font.SysFont(None, 24)
+                version_text = version_font.render("2D Grid-Based Version", True, BLACK)
+                version_rect = version_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
+                self.screen.blit(version_text, version_rect)
+
+                if self.menu.current_menu == "main":
+                    # Draw buttons
+                    for button in self.menu.main_buttons:
+                        button.check_hover(pygame.mouse.get_pos())
+                        button.draw(self.screen)
+                elif self.menu.current_menu == "options":
+                    self.menu.draw_options()
+                elif self.menu.current_menu == "high_scores":
+                    self.menu.draw_high_scores()
+
+                pygame.display.flip()
+
+            # Control frame rate
+            self.clock.tick(30)
+        # Handle menu choice
+        if menu_choice in ["single_player", "host_game", "join_game"]:
+            self.initialize_game()
+            self.game_state = GameState.PLAYING
+
+    def handle_playing_state(self):
+        # Game loop
+        self.game_active = True
+        while self.game_active and not self.quit_game:
+            # Process events
+            self.handle_events()
+
+            if not self.game_active:
+                continue
+
+            # Update game
+            current_time = time.time()
+            elapsed = current_time - self.last_time
+            self.last_time = current_time
+
+            self.time_left -= elapsed
+            if self.time_left <= 0:
+                self.game_active = False
+                self.game_state = GameState.GAME_OVER
+
+            # Update deer
+            for deer in self.deer:
+                deer.update(self.player, self.map)
+
+            # Draw everything
+            self.screen.fill(WHITE)
+            self.map.draw(self.screen)
+            for deer in self.deer:
+                deer.draw(self.screen)
+            self.player.draw(self.screen)
+
+            # Draw UI
+            font = pygame.font.SysFont(None, 36)
+            score_text = font.render(f"Score: {self.score}", True, BLACK)
+            time_text = font.render(f"Time: {int(self.time_left)}s", True, BLACK)
+            self.screen.blit(score_text, (10, 10))
+            self.screen.blit(time_text, (WINDOW_WIDTH - 150, 10))
+
+            pygame.display.flip()
+            self.clock.tick(10)
+
+    def handle_game_over_state(self):
+        # Game over screen
+        game_over_active = True
+        # Clear event queue before showing game over screen
+        pygame.event.clear()
+        while game_over_active and not self.quit_game:
+            # Process events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game = True
+                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    game_over_active = False
+                    self.game_state = GameState.MENU
+
+            # Draw game over screen
+            self.screen.fill(WHITE)
+
+            font = pygame.font.SysFont(None, 72)
+            game_over_text = font.render("GAME OVER", True, BLACK)
+            final_score = font.render(f"Final Score: {self.score}", True, BLACK)
+
+            # Add instructions
+            instructions_font = pygame.font.SysFont(None, 32)
+            instructions = instructions_font.render("Press any key to continue", True, BLACK)
+
+            self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
+            self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
+            self.screen.blit(instructions, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 80))
+
+            pygame.display.flip()
+            self.clock.tick(30)

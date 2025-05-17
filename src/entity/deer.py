@@ -9,9 +9,8 @@ from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 class Deer(GameObject):
     """Deer that player photographs"""
 
-    def __init__(self, x, y, deer_type="NORMAL"):
+    def __init__(self, x: int, y: int):
         super().__init__(x, y)
-        self.deer_type = deer_type
         self.photographed = False
         self.alert_level = 0  # 0-10, higher means more likely to flee
 

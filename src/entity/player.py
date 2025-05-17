@@ -5,13 +5,19 @@ import pygame
 from src.entity.game_object import GameObject
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
+class Direction:
+    """Player direction"""
+    UP = "UP"
+    DOWN = "DOWN"
+    LEFT = "LEFT"
+    RIGHT = "RIGHT"
 
 class Player(GameObject):
     """Player character"""
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.direction = "UP"  # UP, DOWN, LEFT, RIGHT
+        self.direction = Direction.UP
         self.photos_taken = 0
 
         self.hunter_up_image = pygame.image.load("assets/textures/hunter-back.png").convert_alpha()
@@ -28,17 +34,17 @@ class Player(GameObject):
 
     def draw(self, surface):
         # Draw player pointing in direction
-
         pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
 
-        if self.direction == "UP":
-            surface.blit(self.hunter_up_image, pos)
-        elif self.direction == "DOWN":
-            surface.blit(self.hunter_down_image, pos)
-        elif self.direction == "LEFT":
-            surface.blit(self.hunter_left_image, pos)
-        else:  # RIGHT
-            surface.blit(self.hunter_right_image, pos)
+        match self.direction:
+            case Direction.UP:
+                surface.blit(self.hunter_up_image, pos)
+            case Direction.DOWN:
+                surface.blit(self.hunter_down_image, pos)
+            case Direction.LEFT:
+                surface.blit(self.hunter_left_image, pos)
+            case Direction.RIGHT:
+                surface.blit(self.hunter_right_image, pos)
 
     def move(self, dx, dy, game_map):
         """Try to move in the specified direction"""
@@ -58,14 +64,15 @@ class Player(GameObject):
         x, y = self.x, self.y
 
         # Direction vectors
-        if self.direction == "UP":
-            dx, dy = 0, -1
-        elif self.direction == "DOWN":
-            dx, dy = 0, 1
-        elif self.direction == "LEFT":
-            dx, dy = -1, 0
-        else:  # RIGHT
-            dx, dy = 1, 0
+        match self.direction:
+            case Direction.UP:
+                dx, dy = 0, -1
+            case Direction.DOWN:
+                dx, dy = 0, 1
+            case Direction.LEFT:
+                dx, dy = -1, 0
+            case Direction.RIGHT:
+                dx, dy = 1, 0
 
         # Track how far the photo "travels"
         photo_range = 10  # How far the photo can see
@@ -90,6 +97,7 @@ class Player(GameObject):
                     deer_photographed.append(deer)
 
             # In bushes, reduce visibility (50% chance to continue)
+            # TODO: Check in group if we want 'deterministic' photo behaviour
             if game_map.get_cell(check_x, check_y) == "BUSH" and random.random() < 0.5:
                 break
 
