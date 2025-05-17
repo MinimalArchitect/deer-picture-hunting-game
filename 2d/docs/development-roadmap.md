@@ -10,18 +10,27 @@ We've implemented a foundational grid-based game using Python and Pygame. This i
 - Environment with obstacles (trees, rocks, bushes) that affect movement and visibility
 - Timer and scoring system
 
-### ⬜ Main Menu Screen
-The main menu will provide entry points to different game modes and settings:
-- **Implementation approach**: Create a new `Menu` class that handles screen state and button interactions
-- **Key features**:
-  - Play Game button (single player mode)
-  - Host Game button (create multiplayer session)
-  - Join Game button (connect to existing session)
-  - Options button (adjust game settings)
-  - High Scores button (view saved scores)
-  - Exit button
-- **Technical details**: Use Pygame's event system to handle mouse clicks on menu elements
-- **Design considerations**: Consistent visual style with the main game
+### ✅ Main Menu Screen (Completed)
+The main menu provides entry points to different game modes and settings:
+- **Implementation completed**:
+  - Created `Menu` and `Button` classes for UI interaction
+  - Implemented screen state management with mouse hover effects
+  - Added event handling for button clicks
+  - Set up menu-to-game state transitions
+- **Current features**:
+  - Single Player button (starts game)
+  - Host Game button (currently starts single player mode)
+  - Join Game button (currently starts single player mode)
+  - Options button (placeholder screen with "Coming Soon")
+  - High Scores button (placeholder screen with "Coming Soon")
+  - Exit button (quits application)
+- **Menu flow**:
+  - ESC key returns from game to menu
+  - Game over screen transitions back to menu
+  - Clean state management between screens
+- **Future improvements**:
+  - Implement actual multiplayer functionality for Host/Join
+  - Complete Options and High Scores screens
 
 ### ⬜ High Score System
 The high score system will track and display top performances:

@@ -76,77 +76,6 @@ class Menu:
         
         # Load title font
         self.title_font = pygame.font.SysFont(None, 64)
-        
-    def run(self):
-        """Run the menu loop"""
-        result = None  # Will store the selected option
-        
-        while self.running:
-            mouse_pos = pygame.mouse.get_pos()
-            mouse_clicked = False
-            
-            # Handle events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    pygame.quit()
-                    return "exit"
-                    
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left click
-                        mouse_clicked = True
-            
-            # Update button hover states
-            for button in self.main_buttons:
-                button.check_hover(mouse_pos)
-            
-            # Check for button clicks
-            if mouse_clicked:
-                if self.main_buttons[0].is_clicked(mouse_pos, mouse_clicked):  # Single Player
-                    self.running = False
-                    result = "single_player"
-                elif self.main_buttons[1].is_clicked(mouse_pos, mouse_clicked):  # Host Game
-                    self.running = False
-                    result = "host_game"
-                elif self.main_buttons[2].is_clicked(mouse_pos, mouse_clicked):  # Join Game
-                    self.running = False
-                    result = "join_game"
-                elif self.main_buttons[3].is_clicked(mouse_pos, mouse_clicked):  # Options
-                    self.current_menu = "options"
-                elif self.main_buttons[4].is_clicked(mouse_pos, mouse_clicked):  # High Scores
-                    self.current_menu = "high_scores"
-                elif self.main_buttons[5].is_clicked(mouse_pos, mouse_clicked):  # Exit
-                    self.running = False
-                    pygame.quit()
-                    return "exit"
-            
-            # Draw the screen
-            self.screen.fill(self.bg_color)
-            
-            # Draw title
-            title_text = self.title_font.render("Deer Picture Hunting", True, BLACK)
-            title_rect = title_text.get_rect(center=(WINDOW_WIDTH//2, 80))
-            self.screen.blit(title_text, title_rect)
-            
-            # Draw game version text
-            version_font = pygame.font.SysFont(None, 24)
-            version_text = version_font.render("2D Grid-Based Version", True, BLACK)
-            version_rect = version_text.get_rect(center=(WINDOW_WIDTH//2, 120))
-            self.screen.blit(version_text, version_rect)
-            
-            # Draw appropriate menu
-            if self.current_menu == "main":
-                for button in self.main_buttons:
-                    button.draw(self.screen)
-            elif self.current_menu == "options":
-                self.draw_options()
-            elif self.current_menu == "high_scores":
-                self.draw_high_scores()
-            
-            pygame.display.flip()
-            self.clock.tick(30)
-        
-        return result
     
     def draw_options(self):
         """Draw the options menu (placeholder)"""
@@ -560,6 +489,10 @@ class Game:
                                     elif i == 2:  # Join Game
                                         menu_choice = "join_game"
                                         menu_active = False
+                                    elif i == 3:  # Options
+                                        self.menu.current_menu = "options"
+                                    elif i == 4:  # High Scores
+                                        self.menu.current_menu = "high_scores"
                                     elif i == 5:  # Exit
                                         quit_game = True
                     
@@ -572,10 +505,21 @@ class Game:
                         title_rect = title_text.get_rect(center=(WINDOW_WIDTH//2, 80))
                         self.screen.blit(title_text, title_rect)
                         
-                        # Draw buttons
-                        for button in self.menu.main_buttons:
-                            button.check_hover(pygame.mouse.get_pos())
-                            button.draw(self.screen)
+                        # Draw version text
+                        version_font = pygame.font.SysFont(None, 24)
+                        version_text = version_font.render("2D Grid-Based Version", True, BLACK)
+                        version_rect = version_text.get_rect(center=(WINDOW_WIDTH//2, 120))
+                        self.screen.blit(version_text, version_rect)
+                        
+                        if self.menu.current_menu == "main":
+                            # Draw buttons
+                            for button in self.menu.main_buttons:
+                                button.check_hover(pygame.mouse.get_pos())
+                                button.draw(self.screen)
+                        elif self.menu.current_menu == "options":
+                            self.menu.draw_options()
+                        elif self.menu.current_menu == "high_scores":
+                            self.menu.draw_high_scores()
                         
                         pygame.display.flip()
                     
