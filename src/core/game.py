@@ -75,26 +75,29 @@ class Game:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.quit_game = False
+                self.quit_game = True
 
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.player.direction = Direction.UP
-                    self.player.move(0, -1, self.map)
-                elif event.key == pygame.K_DOWN:
-                    self.player.direction = Direction.DOWN
-                    self.player.move(0, 1, self.map)
-                elif event.key == pygame.K_LEFT:
-                    self.player.direction = Direction.LEFT
-                    self.player.move(-1, 0, self.map)
-                elif event.key == pygame.K_RIGHT:
-                    self.player.direction = Direction.RIGHT
-                    self.player.move(1, 0, self.map)
-                elif event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:
                     self.take_photo()
                 elif event.key == pygame.K_ESCAPE:
                     # Return to menu on escape
-                    self.game_active = GameState.MENU
+                    self.game_active = False
+                    self.game_state = GameState.MENU
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP]:
+            self.player.direction = Direction.UP
+            self.player.move(0, -1, self.map)
+        elif keys[pygame.K_DOWN]:
+            self.player.direction = Direction.DOWN
+            self.player.move(0, 1, self.map)
+        elif keys[pygame.K_LEFT]:
+            self.player.direction = Direction.LEFT
+            self.player.move(-1, 0, self.map)
+        elif keys[pygame.K_RIGHT]:
+            self.player.direction = Direction.RIGHT
+            self.player.move(1, 0, self.map)
 
     def take_photo(self):
         """Player takes a photo"""
