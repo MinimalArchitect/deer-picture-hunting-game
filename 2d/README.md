@@ -97,9 +97,12 @@ The game uses a simple grid-based collision system and implements basic AI for t
 
 ```
 2d/
-├── main.py          # Main game file containing all classes and game loop
 ├── assets/          # Game assets (if any)
-    └── ...
+├── docs/            # Other readme files and documentation
+├── screenshots/     # Game play screenshots
+├── README.md        # Main readme file
+├── main.py          # Main game file containing all classes and game loop
+    
 ```
 
 ### Classes Overview
