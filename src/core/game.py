@@ -3,12 +3,13 @@ import time
 
 import pygame
 
-from src.core.game_map import GameMap
+from src.core.game_map import GameMap, GridType
 from src.entity.deer import Deer
 from src.entity.player import Player, Direction
 from src.ui.menu import Menu
 from src.util.color import BLACK, WHITE
 from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
+from src.util.texture import Texture
 
 
 class GameState:
@@ -27,6 +28,8 @@ class Game:
         pygame.display.set_caption("Deer Picture Hunting")
         self.clock = pygame.time.Clock()
         self.game_state = GameState.MENU
+
+        Texture.load_all()
 
         # Create menu
         self.menu = Menu(self.screen)
@@ -67,7 +70,7 @@ class Game:
             x = random.randint(0, GRID_WIDTH - 1)
             y = random.randint(0, GRID_HEIGHT - 1)
 
-            if self.map.get_cell(x, y) == "EMPTY":
+            if self.map.get_cell(x, y) == GridType.EMPTY:
                 return object_class(x, y)
 
     def handle_events(self):
@@ -115,6 +118,9 @@ class Game:
         self.last_time = current_time
 
         self.time_left -= elapsed
+        if self.time_left <= 0:
+            self.game_active = False
+            self.game_state = GameState.GAME_OVER
 
         # Update deer
         for deer in self.deer:
@@ -239,19 +245,7 @@ class Game:
             if not self.game_active:
                 continue
 
-            # Update game
-            current_time = time.time()
-            elapsed = current_time - self.last_time
-            self.last_time = current_time
-
-            self.time_left -= elapsed
-            if self.time_left <= 0:
-                self.game_active = False
-                self.game_state = GameState.GAME_OVER
-
-            # Update deer
-            for deer in self.deer:
-                deer.update(self.player, self.map)
+            self.update()
 
             # Draw everything
             self.screen.fill(WHITE)

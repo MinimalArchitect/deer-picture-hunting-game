@@ -2,7 +2,9 @@ import random
 
 import pygame
 
+from src.core.game_map import GridType
 from src.entity.game_object import GameObject
+from src.util.texture import Texture
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
 class Direction:
@@ -20,31 +22,19 @@ class Player(GameObject):
         self.direction = Direction.UP
         self.photos_taken = 0
 
-        self.hunter_up_image = pygame.image.load("assets/textures/hunter-back.png").convert_alpha()
-        self.hunter_up_image = pygame.transform.scale(self.hunter_up_image, (GRID_SIZE, GRID_SIZE))
-
-        self.hunter_down_image = pygame.image.load("assets/textures/hunter-front.png").convert_alpha()
-        self.hunter_down_image = pygame.transform.scale(self.hunter_down_image, (GRID_SIZE, GRID_SIZE))
-
-        self.hunter_right_image = pygame.image.load("assets/textures/hunter-right.png").convert_alpha()
-        self.hunter_right_image = pygame.transform.scale(self.hunter_right_image, (GRID_SIZE, GRID_SIZE))
-
-        self.hunter_left_image = pygame.image.load("assets/textures/hunter-left.png").convert_alpha()
-        self.hunter_left_image = pygame.transform.scale(self.hunter_left_image, (GRID_SIZE, GRID_SIZE))
-
     def draw(self, surface):
         # Draw player pointing in direction
         pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
 
         match self.direction:
             case Direction.UP:
-                surface.blit(self.hunter_up_image, pos)
+                surface.blit(Texture.hunter_back, pos)
             case Direction.DOWN:
-                surface.blit(self.hunter_down_image, pos)
+                surface.blit(Texture.hunter_front, pos)
             case Direction.LEFT:
-                surface.blit(self.hunter_left_image, pos)
+                surface.blit(Texture.hunter_left, pos)
             case Direction.RIGHT:
-                surface.blit(self.hunter_right_image, pos)
+                surface.blit(Texture.hunter_right, pos)
 
     def move(self, dx, dy, game_map):
         """Try to move in the specified direction"""
@@ -53,7 +43,7 @@ class Player(GameObject):
 
         # Check if new position is valid
         if (0 <= new_x < GRID_WIDTH and 0 <= new_y < GRID_HEIGHT and
-                game_map.get_cell(new_x, new_y) not in ["TREE", "ROCK"]):
+                game_map.get_cell(new_x, new_y) not in [GridType.TREE, GridType.ROCK]):
             self.x = new_x
             self.y = new_y
             return True

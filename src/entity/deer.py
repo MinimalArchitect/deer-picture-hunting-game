@@ -1,9 +1,9 @@
 import random
 
-import pygame
-
 from src.entity.game_object import GameObject
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+from src.util.math import clip
+from src.util.texture import Texture
 
 
 class Deer(GameObject):
@@ -13,14 +13,12 @@ class Deer(GameObject):
         super().__init__(x, y)
         self.photographed = False
         self.alert_level = 0  # 0-10, higher means more likely to flee
-
-        self.deer_image = pygame.image.load("assets/textures/deer.png").convert_alpha()
-        self.deer_image = pygame.transform.scale(self.deer_image, (GRID_SIZE, GRID_SIZE))
+        self.MAX_ALERT_LEVEL = 10
 
     def draw(self, surface):
         # Draw deer
         pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
-        surface.blit(self.deer_image, pos)
+        surface.blit(Texture.deer, pos)
 
     def update(self, player, game_map):
         """Update deer behavior based on player position"""
@@ -32,6 +30,9 @@ class Deer(GameObject):
             self.alert_level += 2
         else:
             self.alert_level = max(0, self.alert_level - 1)  # Calm down over time
+
+        # Limit alert Level to 10
+        self.alert_level = clip(self.alert_level, 0, self.MAX_ALERT_LEVEL)
 
         # If very alert, try to move away from player
         if self.alert_level > 5:
@@ -54,27 +55,19 @@ class Deer(GameObject):
             (-dx, -dy),  # Diagonal away
             (0, 0)  # Stay put
         ]
-
-        # Shuffle to avoid predictable patterns
-        random.shuffle(possible_moves)
-
-        # Try each move until we find a valid one
-        for move_dx, move_dy in possible_moves:
-            new_x = self.x + move_dx
-            new_y = self.y + move_dy
-
-            if (0 <= new_x < GRID_WIDTH and 0 <= new_y < GRID_HEIGHT and
-                    game_map.get_cell(new_x, new_y) not in ["TREE", "ROCK"]):
-                self.x = new_x
-                self.y = new_y
-                break
+        self._move(game_map, possible_moves)
 
     def random_move(self, game_map):
         """Move in a random direction"""
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        random.shuffle(directions)
+        self._move(game_map, directions)
 
-        for dx, dy in directions:
+    def _move(self, game_map, possible_moves):
+        # Shuffle to avoid predictable patterns
+        random.shuffle(possible_moves)
+
+        # Try each move until we find a valid one
+        for dx, dy in possible_moves:
             new_x = self.x + dx
             new_y = self.y + dy
 
