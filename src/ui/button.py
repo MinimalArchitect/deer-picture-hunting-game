@@ -1,6 +1,6 @@
 import pygame
 
-from src.util.color import BLACK
+from src.util.color import Color
 
 
 class Button:
@@ -18,10 +18,10 @@ class Button:
         # Draw button with appropriate color based on hover state
         color = self.hover_color if is_hovered else self.color
         pygame.draw.rect(surface, color, self.rect)
-        pygame.draw.rect(surface, BLACK, self.rect, 2)  # Border
+        pygame.draw.rect(surface, Color.BLACK, self.rect, 2)  # Border
 
         # Draw text
-        text_surface = self.font.render(self.text, True, BLACK)
+        text_surface = self.font.render(self.text, True, Color.BLACK)
         text_rect = text_surface.get_rect(center=self.rect.center)
         surface.blit(text_surface, text_rect)
 

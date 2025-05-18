@@ -6,7 +6,7 @@ import pygame
 
 from src.core.game_map import GridType
 from src.entity.game_object import GameObject
-from src.util.color import LIGHT_GREEN
+from src.util.color import Color
 from src.util.texture import Texture
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
@@ -44,8 +44,7 @@ class Player(GameObject):
         if time.time() - self.spawn_time < 3:
             pulse_alpha = int(100 + 50 * math.sin((time.time() - self.spawn_time) * 6))
             highlight = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-            green = LIGHT_GREEN
-            highlight.fill((*green, pulse_alpha))
+            highlight.fill((*Color.LIGHT_GREEN, pulse_alpha))
             surface.blit(highlight, pos)
 
     def move(self, dx, dy, game_map):

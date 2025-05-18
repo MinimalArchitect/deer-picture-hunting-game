@@ -1,7 +1,7 @@
 import pygame
 
 from src.ui.button import Button
-from src.util.color import BLACK
+from src.util.color import Color
 from src.util.config import WINDOW_WIDTH
 
 class MenuType:
@@ -51,7 +51,7 @@ class Menu:
         """Draw the placeholder coming soon screen"""
         # Simple "Coming soon" message and back button
         font = pygame.font.SysFont(None, 48)
-        text = font.render(f"{text}: Coming Soon", True, BLACK)
+        text = font.render(f"{text}: Coming Soon", True, Color.BLACK)
         text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 250))
         self.screen.blit(text, text_rect)
 

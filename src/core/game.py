@@ -7,7 +7,7 @@ from src.core.game_map import GameMap, GridType
 from src.entity.deer import Deer
 from src.entity.player import Player, Direction
 from src.ui.menu import Menu, MenuType
-from src.util.color import BLACK, WHITE
+from src.util.color import Color
 from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
 from src.util.texture import Texture
 
@@ -129,7 +129,7 @@ class Game:
     def draw(self):
         """Draw everything to the screen"""
         # Clear screen
-        self.screen.fill(WHITE)
+        self.screen.fill(Color.WHITE)
 
         # Draw map
         self.map.draw(self.screen)
@@ -143,8 +143,8 @@ class Game:
 
         # Draw UI
         font = pygame.font.SysFont(None, 36)
-        score_text = font.render(f"Score: {self.score}", True, BLACK)
-        time_text = font.render(f"Time: {int(self.time_left)}s", True, BLACK)
+        score_text = font.render(f"Score: {self.score}", True, Color.BLACK)
+        time_text = font.render(f"Time: {int(self.time_left)}s", True, Color.BLACK)
 
         self.screen.blit(score_text, (10, 10))
         self.screen.blit(time_text, (WINDOW_WIDTH - 150, 10))
@@ -206,13 +206,13 @@ class Game:
                 self.screen.fill(self.menu.bg_color)
 
                 # Draw title
-                title_text = self.menu.title_font.render("Deer Picture Hunting", True, BLACK)
+                title_text = self.menu.title_font.render("Deer Picture Hunting", True, Color.BLACK)
                 title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
                 self.screen.blit(title_text, title_rect)
 
                 # Draw version text
                 version_font = pygame.font.SysFont(None, 24)
-                version_text = version_font.render("2D Grid-Based Version", True, BLACK)
+                version_text = version_font.render("2D Grid-Based Version", True, Color.BLACK)
                 version_rect = version_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
                 self.screen.blit(version_text, version_rect)
 
@@ -248,7 +248,7 @@ class Game:
             self.update()
 
             # Draw everything
-            self.screen.fill(WHITE)
+            self.screen.fill(Color.WHITE)
             self.map.draw(self.screen)
             for deer in self.deer:
                 deer.draw(self.screen)
@@ -256,8 +256,8 @@ class Game:
 
             # Draw UI
             font = pygame.font.SysFont(None, 36)
-            score_text = font.render(f"Score: {self.score}", True, BLACK)
-            time_text = font.render(f"Time: {int(self.time_left)}s", True, BLACK)
+            score_text = font.render(f"Score: {self.score}", True, Color.BLACK)
+            time_text = font.render(f"Time: {int(self.time_left)}s", True, Color.BLACK)
             self.screen.blit(score_text, (10, 10))
             self.screen.blit(time_text, (WINDOW_WIDTH - 150, 10))
 
@@ -279,15 +279,15 @@ class Game:
                     self.game_state = GameState.MENU
 
             # Draw game over screen
-            self.screen.fill(WHITE)
+            self.screen.fill(Color.WHITE)
 
             font = pygame.font.SysFont(None, 72)
-            game_over_text = font.render("GAME OVER", True, BLACK)
-            final_score = font.render(f"Final Score: {self.score}", True, BLACK)
+            game_over_text = font.render("GAME OVER", True, Color.BLACK)
+            final_score = font.render(f"Final Score: {self.score}", True, Color.BLACK)
 
             # Add instructions
             instructions_font = pygame.font.SysFont(None, 32)
-            instructions = instructions_font.render("Press any key to continue", True, BLACK)
+            instructions = instructions_font.render("Press any key to continue", True, Color.BLACK)
 
             self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
             self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
