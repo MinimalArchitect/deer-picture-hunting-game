@@ -1,9 +1,12 @@
+import math
 import random
+import time
 
 import pygame
 
 from src.core.game_map import GridType
 from src.entity.game_object import GameObject
+from src.util.color import LIGHT_GREEN
 from src.util.texture import Texture
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
@@ -21,6 +24,7 @@ class Player(GameObject):
         super().__init__(x, y)
         self.direction = Direction.UP
         self.photos_taken = 0
+        self.spawn_time = time.time()  # Store the time when player is created
 
     def draw(self, surface):
         # Draw player pointing in direction
@@ -35,6 +39,14 @@ class Player(GameObject):
                 surface.blit(Texture.hunter_left, pos)
             case Direction.RIGHT:
                 surface.blit(Texture.hunter_right, pos)
+
+        # Highlight the player with pulsing green glow for 3 seconds
+        if time.time() - self.spawn_time < 3:
+            pulse_alpha = int(100 + 50 * math.sin((time.time() - self.spawn_time) * 6))
+            highlight = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+            green = LIGHT_GREEN
+            highlight.fill((*green, pulse_alpha))
+            surface.blit(highlight, pos)
 
     def move(self, dx, dy, game_map):
         """Try to move in the specified direction"""
