@@ -6,7 +6,7 @@ import pygame
 from src.core.game_map import GameMap, GridType
 from src.entity.deer import Deer
 from src.entity.player import Player, Direction
-from src.ui.menu import Menu
+from src.ui.menu import Menu, MenuType
 from src.util.color import BLACK, WHITE
 from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
 from src.util.texture import Texture
@@ -216,14 +216,14 @@ class Game:
                 version_rect = version_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
                 self.screen.blit(version_text, version_rect)
 
-                if self.menu.current_menu == "main":
+                if self.menu.current_menu == MenuType.MAIN:
                     # Draw buttons
                     for button in self.menu.main_buttons:
-                        button.check_hover(pygame.mouse.get_pos())
-                        button.draw(self.screen)
-                elif self.menu.current_menu == "options":
+                        is_hovered = button.check_hover(pygame.mouse.get_pos())
+                        button.draw(self.screen, is_hovered)
+                elif self.menu.current_menu == MenuType.OPTIONS:
                     self.menu.draw_options()
-                elif self.menu.current_menu == "high_scores":
+                elif self.menu.current_menu == MenuType.HIGH_SCORES:
                     self.menu.draw_high_scores()
 
                 pygame.display.flip()

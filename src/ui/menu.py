@@ -4,6 +4,10 @@ from src.ui.button import Button
 from src.util.color import BLACK
 from src.util.config import WINDOW_WIDTH
 
+class MenuType:
+    MAIN = "main"
+    OPTIONS = "options"
+    HIGH_SCORES = "high_scores"
 
 class Menu:
     """Game menu system"""
@@ -11,7 +15,7 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.clock = pygame.time.Clock()
-        self.current_menu = "main"  # main, options, high_scores
+        self.current_menu = MenuType.MAIN
 
         # Define colors
         self.bg_color = (230, 240, 240)  # Light blue-gray background
@@ -37,32 +41,27 @@ class Menu:
 
     def draw_options(self):
         """Draw the options menu (placeholder)"""
-        # For now, just a simple "Coming soon" message and back button
-        font = pygame.font.SysFont(None, 48)
-        text = font.render("Options: Coming Soon", True, BLACK)
-        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 250))
-        self.screen.blit(text, text_rect)
-
-        # Back button
-        back_button = Button(WINDOW_WIDTH // 2 - 100, 400, 200, 50, "Back", self.button_color, self.button_hover)
-        back_button.draw(self.screen)
-
-        # Check for back button click
-        if back_button.check_hover(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-            self.current_menu = "main"
+        self.draw_coming_soon_screen("Options")
 
     def draw_high_scores(self):
         """Draw the high scores menu (placeholder)"""
-        # For now, just a simple "Coming soon" message and back button
+        self.draw_coming_soon_screen("High Scores")
+
+    def draw_coming_soon_screen(self, text: str):
+        """Draw the placeholder coming soon screen"""
+        # Simple "Coming soon" message and back button
         font = pygame.font.SysFont(None, 48)
-        text = font.render("High Scores: Coming Soon", True, BLACK)
+        text = font.render(f"{text}: Coming Soon", True, BLACK)
         text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 250))
         self.screen.blit(text, text_rect)
 
         # Back button
         back_button = Button(WINDOW_WIDTH // 2 - 100, 400, 200, 50, "Back", self.button_color, self.button_hover)
-        back_button.draw(self.screen)
+        is_back_button_hovered = back_button.check_hover(pygame.mouse.get_pos())
+        back_button.draw(self.screen, is_back_button_hovered)
+
+        # TODO split up drawing and behaviour
 
         # Check for back button click
-        if back_button.check_hover(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-            self.current_menu = "main"
+        if is_back_button_hovered and pygame.mouse.get_pressed()[0]:
+            self.current_menu = MenuType.MAIN

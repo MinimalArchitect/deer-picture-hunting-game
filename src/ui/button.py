@@ -14,9 +14,9 @@ class Button:
         self.is_hovered = False
         self.font = pygame.font.SysFont(None, 32)
 
-    def draw(self, surface):
+    def draw(self, surface, is_hovered):
         # Draw button with appropriate color based on hover state
-        color = self.hover_color if self.is_hovered else self.color
+        color = self.hover_color if is_hovered else self.color
         pygame.draw.rect(surface, color, self.rect)
         pygame.draw.rect(surface, BLACK, self.rect, 2)  # Border
 
@@ -27,8 +27,7 @@ class Button:
 
     def check_hover(self, mouse_pos):
         """Check if mouse is hovering over button"""
-        self.is_hovered = self.rect.collidepoint(mouse_pos)
-        return self.is_hovered
+        return self.rect.collidepoint(mouse_pos)
 
     def is_clicked(self, mouse_pos, mouse_click):
         """Check if button is clicked"""
