@@ -6,6 +6,7 @@ import pygame
 from src.core.game_map import GameMap, GridType
 from src.entity.deer import Deer
 from src.entity.player import Player, Direction
+from src.ui.button import Button
 from src.ui.menu import Menu, MenuType
 from src.util.color import Color
 from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
@@ -17,6 +18,7 @@ class GameState:
     """Enum for game states"""
     MENU = "menu"
     PLAYING = "playing"
+    PAUSED = "paused"
     GAME_OVER = "game_over"
 
 
@@ -48,6 +50,7 @@ class Game:
         self.time_left = 60
         self.last_time = time.time()
 
+        self.game_active = True
         self.quit_game = False
 
     def initialize_game(self):
@@ -99,9 +102,9 @@ class Game:
                 if event.key == pygame.K_SPACE:
                     self.take_photo()
                 elif event.key == pygame.K_ESCAPE:
-                    # Return to menu on escape
-                    self.game_active = False
-                    self.game_state = GameState.MENU
+                    if self.game_state == GameState.PLAYING:
+                        self.game_state = GameState.PAUSED
+                        self.game_active = False
 
         has_moved = False
 
@@ -121,6 +124,69 @@ class Game:
 
         if has_moved and self.sound_enabled:
             Sound.move.play()
+
+    def handle_pause_state(self):
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 150))  # Semi-transparent black
+
+        # Create pause menu buttons
+        button_width = 200
+        button_height = 50
+        center_x = WINDOW_WIDTH // 2 - button_width // 2
+
+        continue_btn = Button(center_x, 200, button_width, button_height, "Continue", self.menu.button_color,
+                              self.menu.button_hover)
+        main_menu_btn = Button(center_x, 270, button_width, button_height, "Main Menu", self.menu.button_color,
+                               self.menu.button_hover)
+        exit_btn = Button(center_x, 340, button_width, button_height, "Exit", self.menu.button_color,
+                          self.menu.button_hover)
+
+        while self.game_state == GameState.PAUSED and not self.quit_game:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.game_state = GameState.PLAYING
+                        self.game_active = True
+                        self.last_time = time.time()
+                        return
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if continue_btn.is_clicked(mouse_pos, True):
+                        self.game_state = GameState.PLAYING
+                        self.game_active = True
+                        self.last_time = time.time()
+                        return
+                    elif main_menu_btn.is_clicked(mouse_pos, True):
+                        self.game_state = GameState.MENU
+                        return
+                    elif exit_btn.is_clicked(mouse_pos, True):
+                        self.quit_game = True
+                        return
+
+            # Draw game
+            self.screen.fill(Color.WHITE)
+            self.map.draw(self.screen)
+            for deer in self.deer:
+                deer.draw(self.screen)
+            self.player.draw(self.screen)
+
+            # Draw static UI
+            font = pygame.font.SysFont(None, 36)
+            score_text = font.render(f"Score: {self.score}", True, Color.BLACK)
+            time_text = font.render(f"Time: {int(self.time_left)}s", True, Color.BLACK)
+            self.screen.blit(score_text, (10, 10))
+            self.screen.blit(time_text, (WINDOW_WIDTH - 150, 10))
+
+            # Overlay and pause buttons
+            self.screen.blit(overlay, (0, 0))
+            for btn in [continue_btn, main_menu_btn, exit_btn]:
+                hovered = btn.check_hover(pygame.mouse.get_pos())
+                btn.draw(self.screen, hovered)
+
+            pygame.display.flip()
+            self.clock.tick(30)
 
     def take_photo(self):
         """Player takes a photo"""
@@ -183,6 +249,8 @@ class Game:
                     self.handle_menu_state()
                 case GameState.PLAYING:
                     self.handle_playing_state()
+                case GameState.PAUSED:
+                    self.handle_pause_state()
                 case GameState.GAME_OVER:
                     self.handle_game_over_state()
 
