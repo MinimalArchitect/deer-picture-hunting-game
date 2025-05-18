@@ -6,7 +6,6 @@ import pygame
 
 from src.core.game_map import GridType
 from src.entity.game_object import GameObject
-from src.util.color import Color
 from src.util.texture import Texture
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 

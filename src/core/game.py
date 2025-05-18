@@ -9,6 +9,7 @@ from src.entity.player import Player, Direction
 from src.ui.menu import Menu, MenuType
 from src.util.color import Color
 from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
+from src.util.sound import Sound
 from src.util.texture import Texture
 
 
@@ -24,12 +25,17 @@ class Game:
 
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Deer Picture Hunting")
         self.clock = pygame.time.Clock()
         self.game_state = GameState.MENU
 
+        # Load textures and sounds
         Texture.load_all()
+        Sound.load_all()
+
+        self.sound_enabled = True
 
         # Create menu
         self.menu = Menu(self.screen)
@@ -97,22 +103,30 @@ class Game:
                     self.game_active = False
                     self.game_state = GameState.MENU
 
+        has_moved = False
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             self.player.direction = Direction.UP
-            self.player.move(0, -1, self.map)
+            has_moved = self.player.move(0, -1, self.map)
         elif keys[pygame.K_DOWN]:
             self.player.direction = Direction.DOWN
-            self.player.move(0, 1, self.map)
+            has_moved = self.player.move(0, 1, self.map)
         elif keys[pygame.K_LEFT]:
             self.player.direction = Direction.LEFT
-            self.player.move(-1, 0, self.map)
+            has_moved = self.player.move(-1, 0, self.map)
         elif keys[pygame.K_RIGHT]:
             self.player.direction = Direction.RIGHT
-            self.player.move(1, 0, self.map)
+            has_moved = self.player.move(1, 0, self.map)
+
+        if has_moved and self.sound_enabled:
+            Sound.move.play()
 
     def take_photo(self):
         """Player takes a photo"""
+        if self.sound_enabled:
+            Sound.take_photo.play()
+
         photographed_deer = self.player.take_photo(self.map, self.deer)
         for deer in photographed_deer:
             if not deer.photographed:
@@ -230,8 +244,13 @@ class Game:
                     for button in self.menu.main_buttons:
                         is_hovered = button.check_hover(pygame.mouse.get_pos())
                         button.draw(self.screen, is_hovered)
+                # elif self.menu.current_menu == MenuType.OPTIONS:
+                #     self.menu.draw_options()
                 elif self.menu.current_menu == MenuType.OPTIONS:
-                    self.menu.draw_options()
+                    result = self.menu.draw_options(self.sound_enabled)
+                    if result == "toggle_sound":
+                        self.sound_enabled = not self.sound_enabled
+                        pygame.time.wait(200)  # Prevent double click
                 elif self.menu.current_menu == MenuType.HIGH_SCORES:
                     self.menu.draw_high_scores()
 

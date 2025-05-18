@@ -32,14 +32,14 @@ class Texture:
 
     @classmethod
     def load_all(cls):
-        Texture.grass = Texture._load(Texture.GRASS_PATH)
-        Texture.rock = Texture._load(Texture.ROCK_PATH)
-        Texture.tree = Texture._load(Texture.TREE_PATH)
-        Texture.bush = Texture._load(Texture.BUSH_PATH)
+        cls.grass = cls._load(cls.GRASS_PATH)
+        cls.rock = cls._load(cls.ROCK_PATH)
+        cls.tree = cls._load(cls.TREE_PATH)
+        cls.bush = cls._load(cls.BUSH_PATH)
 
-        Texture.deer = Texture._load(Texture.DEER_PATH)
+        cls.deer = cls._load(cls.DEER_PATH)
 
-        Texture.hunter_back = Texture._load(Texture.HUNTER_BACK_PATH)
-        Texture.hunter_front = Texture._load(Texture.HUNTER_FRONT_PATH)
-        Texture.hunter_right = Texture._load(Texture.HUNTER_RIGHT_PATH)
-        Texture.hunter_left = Texture._load(Texture.HUNTER_LEFT_PATH)
+        cls.hunter_back = cls._load(cls.HUNTER_BACK_PATH)
+        cls.hunter_front = cls._load(cls.HUNTER_FRONT_PATH)
+        cls.hunter_right = cls._load(cls.HUNTER_RIGHT_PATH)
+        cls.hunter_left = cls._load(cls.HUNTER_LEFT_PATH)

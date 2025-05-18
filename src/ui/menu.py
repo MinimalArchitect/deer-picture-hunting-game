@@ -39,9 +39,43 @@ class Menu:
         # Load title font
         self.title_font = pygame.font.SysFont(None, 64)
 
-    def draw_options(self):
+        self.sound_toggle_button = Button(
+            WINDOW_WIDTH // 2 - 100, 250, 200, 50,
+            "Sound: On", self.button_color, self.button_hover
+        )
+        self.back_button = Button(
+            WINDOW_WIDTH // 2 - 100, 320, 200, 50,
+            "Back", self.button_color, self.button_hover
+        )
+
+    def draw_options(self, sound_enabled):
         """Draw the options menu (placeholder)"""
-        self.draw_coming_soon_screen("Options")
+        # Title
+        font = pygame.font.SysFont(None, 48)
+        title_text = font.render("Options", True, Color.BLACK)
+        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 150))
+        self.screen.blit(title_text, title_rect)
+
+        # Update button label
+        self.sound_toggle_button.text = f"Sound: {'On' if sound_enabled else 'Off'}"
+
+        # Sound toggle button
+        is_sound_hovered = self.sound_toggle_button.check_hover(pygame.mouse.get_pos())
+        self.sound_toggle_button.draw(self.screen, is_sound_hovered)
+
+        # TODO: Configure sound volume
+        # TODO: Configure size of the game
+
+        # Back button
+        is_back_hovered = self.back_button.check_hover(pygame.mouse.get_pos())
+        self.back_button.draw(self.screen, is_back_hovered)
+
+        # Check clicks
+        if is_sound_hovered and pygame.mouse.get_pressed()[0]:
+            return "toggle_sound"
+        elif is_back_hovered and pygame.mouse.get_pressed()[0]:
+            self.current_menu = MenuType.MAIN
+        return None
 
     def draw_high_scores(self):
         """Draw the high scores menu (placeholder)"""
