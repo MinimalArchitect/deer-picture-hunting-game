@@ -51,7 +51,7 @@ class Game:
         self.map.generate_map()
 
         # Place player in an empty cell
-        self.player = self.place_in_empty_cell(Player)
+        self.player = self.place_hunter_in_empty_cell(Color.LIGHT_GREEN)
 
         # Create deer
         self.deer = []
@@ -72,6 +72,15 @@ class Game:
 
             if self.map.get_cell(x, y) == GridType.EMPTY:
                 return object_class(x, y)
+
+    def place_hunter_in_empty_cell(self, clothes_color):
+        """Place a new object in a random empty cell"""
+        while True:
+            x = random.randint(0, GRID_WIDTH - 1)
+            y = random.randint(0, GRID_HEIGHT - 1)
+
+            if self.map.get_cell(x, y) == GridType.EMPTY:
+                return Player(x, y, clothes_color)
 
     def handle_events(self):
         """Handle pygame events"""

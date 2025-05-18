@@ -20,11 +20,12 @@ class Direction:
 class Player(GameObject):
     """Player character"""
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, clothes_color):
         super().__init__(x, y)
         self.direction = Direction.UP
         self.photos_taken = 0
         self.spawn_time = time.time()  # Store the time when player is created
+        self.clothes_color = clothes_color
 
     def draw(self, surface):
         # Draw player pointing in direction
@@ -40,11 +41,11 @@ class Player(GameObject):
             case Direction.RIGHT:
                 surface.blit(Texture.hunter_right, pos)
 
-        # Highlight the player with pulsing green glow for 3 seconds
+        # Highlight the player with pulsing color of the hunter's clothes glow for 3 seconds
         if time.time() - self.spawn_time < 3:
             pulse_alpha = int(100 + 50 * math.sin((time.time() - self.spawn_time) * 6))
             highlight = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-            highlight.fill((*Color.LIGHT_GREEN, pulse_alpha))
+            highlight.fill((*self.clothes_color, pulse_alpha))
             surface.blit(highlight, pos)
 
     def move(self, dx, dy, game_map):
