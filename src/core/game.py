@@ -135,12 +135,12 @@ class Game:
         button_height = 50
         center_x = WINDOW_WIDTH // 2 - button_width // 2
 
-        continue_btn = Button(center_x, 200, button_width, button_height, "Continue", self.menu.button_color,
-                              self.menu.button_hover)
-        main_menu_btn = Button(center_x, 270, button_width, button_height, "Main Menu", self.menu.button_color,
-                               self.menu.button_hover)
-        exit_btn = Button(center_x, 340, button_width, button_height, "Exit", self.menu.button_color,
-                          self.menu.button_hover)
+        continue_btn = (
+            Button(center_x, 200, button_width, button_height, "Continue", Color.BUTTON, Color.BUTTON_HOVER))
+        main_menu_btn = (
+            Button(center_x, 270, button_width, button_height, "Main Menu", Color.BUTTON, Color.BUTTON_HOVER))
+        exit_btn = (
+            Button(center_x, 340, button_width, button_height, "Exit", Color.BUTTON, Color.BUTTON_HOVER))
 
         while self.game_state == GameState.PAUSED and not self.quit_game:
             for event in pygame.event.get():
@@ -295,7 +295,7 @@ class Game:
 
             # Draw menu
             if not self.quit_game:
-                self.screen.fill(self.menu.bg_color)
+                self.screen.fill(Color.BACKGROUND)
 
                 # Draw title
                 title_text = self.menu.title_font.render("Deer Picture Hunting", True, Color.BLACK)

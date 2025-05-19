@@ -4,10 +4,12 @@ from src.ui.button import Button
 from src.util.color import Color
 from src.util.config import WINDOW_WIDTH
 
+
 class MenuType:
     MAIN = "main"
     OPTIONS = "options"
     HIGH_SCORES = "high_scores"
+
 
 class Menu:
     """Game menu system"""
@@ -17,23 +19,18 @@ class Menu:
         self.clock = pygame.time.Clock()
         self.current_menu = MenuType.MAIN
 
-        # Define colors
-        self.bg_color = (230, 240, 240)  # Light blue-gray background
-        self.button_color = (180, 210, 180)  # Light green
-        self.button_hover = (150, 200, 150)  # Slightly darker green
-
         # Create buttons for main menu
         button_width = 200
         button_height = 50
         center_x = WINDOW_WIDTH // 2 - button_width // 2
 
         self.main_buttons = [
-            Button(center_x, 150, button_width, button_height, "Single Player", self.button_color, self.button_hover),
-            Button(center_x, 220, button_width, button_height, "Host Game", self.button_color, self.button_hover),
-            Button(center_x, 290, button_width, button_height, "Join Game", self.button_color, self.button_hover),
-            Button(center_x, 360, button_width, button_height, "Options", self.button_color, self.button_hover),
-            Button(center_x, 430, button_width, button_height, "High Scores", self.button_color, self.button_hover),
-            Button(center_x, 500, button_width, button_height, "Exit", self.button_color, self.button_hover)
+            Button(center_x, 150, button_width, button_height, "Single Player", Color.BUTTON, Color.BUTTON_HOVER),
+            Button(center_x, 220, button_width, button_height, "Host Game", Color.BUTTON, Color.BUTTON_HOVER),
+            Button(center_x, 290, button_width, button_height, "Join Game", Color.BUTTON, Color.BUTTON_HOVER),
+            Button(center_x, 360, button_width, button_height, "Options", Color.BUTTON, Color.BUTTON_HOVER),
+            Button(center_x, 430, button_width, button_height, "High Scores", Color.BUTTON, Color.BUTTON_HOVER),
+            Button(center_x, 500, button_width, button_height, "Exit", Color.BUTTON, Color.BUTTON_HOVER)
         ]
 
         # Load title font
@@ -41,11 +38,11 @@ class Menu:
 
         self.sound_toggle_button = Button(
             WINDOW_WIDTH // 2 - 100, 250, 200, 50,
-            "Sound: On", self.button_color, self.button_hover
+            "Sound: On", Color.BUTTON, Color.BUTTON_HOVER
         )
         self.back_button = Button(
             WINDOW_WIDTH // 2 - 100, 320, 200, 50,
-            "Back", self.button_color, self.button_hover
+            "Back", Color.BUTTON, Color.BUTTON_HOVER
         )
 
     def draw_options(self, sound_enabled):
@@ -90,7 +87,7 @@ class Menu:
         self.screen.blit(text, text_rect)
 
         # Back button
-        back_button = Button(WINDOW_WIDTH // 2 - 100, 400, 200, 50, "Back", self.button_color, self.button_hover)
+        back_button = Button(WINDOW_WIDTH // 2 - 100, 400, 200, 50, "Back", Color.BUTTON, Color.BUTTON_HOVER)
         is_back_button_hovered = back_button.check_hover(pygame.mouse.get_pos())
         back_button.draw(self.screen, is_back_button_hovered)
 
