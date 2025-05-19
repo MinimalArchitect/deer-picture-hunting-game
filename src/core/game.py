@@ -112,16 +112,16 @@ class Game:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             self.player.direction = Direction.UP
-            has_moved = self.player.move(0, -1, self.map)
+            has_moved = self.player.move(0, -1, self.map, self.deer)
         elif keys[pygame.K_DOWN]:
             self.player.direction = Direction.DOWN
-            has_moved = self.player.move(0, 1, self.map)
+            has_moved = self.player.move(0, 1, self.map, self.deer)
         elif keys[pygame.K_LEFT]:
             self.player.direction = Direction.LEFT
-            has_moved = self.player.move(-1, 0, self.map)
+            has_moved = self.player.move(-1, 0, self.map, self.deer)
         elif keys[pygame.K_RIGHT]:
             self.player.direction = Direction.RIGHT
-            has_moved = self.player.move(1, 0, self.map)
+            has_moved = self.player.move(1, 0, self.map, self.deer)
 
         if has_moved and self.sound_enabled:
             Sound.move.play()
@@ -214,7 +214,7 @@ class Game:
 
         # Update deer
         for deer in self.deer:
-            deer.update(self.player, self.map)
+            deer.update(self.player, self.map, self.deer)
 
     def draw(self):
         """Draw everything to the screen"""

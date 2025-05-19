@@ -1,10 +1,12 @@
 import math
 import random
 import time
+from typing import List
 
 import pygame
 
 from src.core.game_map import GridType
+from src.entity.deer import Deer
 from src.entity.game_object import GameObject
 from src.util.texture import Texture
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
@@ -47,14 +49,24 @@ class Player(GameObject):
             highlight.fill((*self.clothes_color, pulse_alpha))
             surface.blit(highlight, pos)
 
-    def move(self, dx, dy, game_map):
+    def move(self, dx, dy, game_map, deer_list: List[Deer]):
         """Try to move in the specified direction"""
         new_x = self.x + dx
         new_y = self.y + dy
 
+        new_hunter_position = (new_x, new_y)
+
+        def is_deer_at_position(deer_list, position):
+            for deer in deer_list:
+                deer_position = (deer.x, deer.y)
+                if deer_position == position:
+                    return True
+            return False
+
         # Check if new position is valid
         if (0 <= new_x < GRID_WIDTH and 0 <= new_y < GRID_HEIGHT and
-                game_map.get_cell(new_x, new_y) not in [GridType.TREE, GridType.ROCK]):
+                game_map.get_cell(new_x, new_y) not in [GridType.TREE, GridType.ROCK] and
+                not is_deer_at_position(deer_list, new_hunter_position)):
             self.x = new_x
             self.y = new_y
             return True

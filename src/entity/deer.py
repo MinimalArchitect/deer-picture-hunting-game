@@ -20,7 +20,7 @@ class Deer(GameObject):
         pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
         surface.blit(Texture.deer, pos)
 
-    def update(self, player, game_map):
+    def update(self, player, game_map, deer_list):
         """Update deer behavior based on player position"""
         # Calculate distance to player
         distance = abs(self.x - player.x) + abs(self.y - player.y)  # Manhattan distance
@@ -36,13 +36,13 @@ class Deer(GameObject):
 
         # If very alert, try to move away from player
         if self.alert_level > 5:
-            self.flee(player, game_map)
+            self.flee(player, game_map, deer_list)
         else:
             # Random movement (25% chance)
             if random.random() < 0.25:
-                self.random_move(game_map)
+                self.random_move(game_map, deer_list)
 
-    def flee(self, player, game_map):
+    def flee(self, player, game_map, deer_list):
         """Move away from player"""
         # Determine direction away from player
         dx = 1 if self.x < player.x else -1
@@ -55,24 +55,37 @@ class Deer(GameObject):
             (-dx, -dy),  # Diagonal away
             (0, 0)  # Stay put
         ]
-        self._move(game_map, possible_moves)
+        self._move(game_map, possible_moves, deer_list)
 
-    def random_move(self, game_map):
+    def random_move(self, game_map, deer_list):
         """Move in a random direction"""
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        self._move(game_map, directions)
+        self._move(game_map, directions, deer_list)
 
-    def _move(self, game_map, possible_moves):
+    def _move(self, game_map, possible_moves, deer_list):
         # Shuffle to avoid predictable patterns
         random.shuffle(possible_moves)
+
+        deer_list = deer_list.copy()
+        deer_list.remove(self)
+
+        def is_deer_at_position(deer_list, position):
+            for deer in deer_list:
+                deer_position = (deer.x, deer.y)
+                if deer_position == position:
+                    return True
+            return False
 
         # Try each move until we find a valid one
         for dx, dy in possible_moves:
             new_x = self.x + dx
             new_y = self.y + dy
 
+            new_deer_position = (new_x, new_y)
+
             if (0 <= new_x < GRID_WIDTH and 0 <= new_y < GRID_HEIGHT and
-                    game_map.get_cell(new_x, new_y) not in ["TREE", "ROCK"]):
+                    game_map.get_cell(new_x, new_y) not in ["TREE", "ROCK"] and
+                    not is_deer_at_position(deer_list, new_deer_position)):
                 self.x = new_x
                 self.y = new_y
                 break
