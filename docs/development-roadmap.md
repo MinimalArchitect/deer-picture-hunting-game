@@ -1,3 +1,83 @@
+# Current Progress Summary – Deer Picture Hunting Game
+
+This document summarizes all completed features and implemented systems as of now.
+
+### Grid-Based Gameplay
+- 2D grid world with fixed tile size (`GRID_SIZE`)
+- Movement restricted to grid cells
+- Basic collision handling via `GameMap`
+
+### Movement
+- Controlled with arrow keys (up/down/left/right)
+- Smooth transitions between tiles
+- Collision detection with obstacles (trees, rocks, bushes)
+
+### Photography
+- Triggered with **spacebar**
+- Takes a photo in the direction the player is facing
+- Detects deer in line-of-sight
+- Each unique deer photographed awards **1 point**
+
+### Timer
+- Countdown timer per level
+- Game ends when time runs out or level is completed
+
+### Implemented Deer Behaviors
+- Random wandering movement
+- Fleeing from player if within alert radius
+- Collision handling with terrain and player
+
+### Predefined Levels
+- **20 handcrafted levels** defined in `predefined_levels.py`
+- Obstacles:
+  - `T` = Tree (blocks movement and sight)
+  - `R` = Rock (blocks movement and sight)
+  - `B` = Bush (blocks sight only)
+- Deterministic map layouts with increasing complexity
+
+### Object-Oriented Design
+- `GameObject` base class
+- Inheritance: `Player`, `Deer`
+- Encapsulation of logic (drawing, movement, updates)
+
+### Modular Codebase
+- `core/` – Game loop and state management
+- `entity/` – Player and deer classes
+- `ui/` – Menu system, buttons, screen transitions
+- `util/` – Helpers: math, textures, colors, sounds
+
+### Menu System
+- Mouse-driven main menu:
+  - **Single Player**, **Host**, **Join**, **Options**, **High Scores**, **Exit**
+- Clean state switching between game and menus
+- ESC returns to menu
+
+### Additional Screens
+- Level selection screen
+- Game over screen
+- Level-end transition with automatic progression
+
+### Sound System
+- `Sound` class implemented
+- Loaded and used:
+  - **Movement sound**
+  - **Camera shutter sound**
+- Ready for extension with ambient/background sounds
+
+### Texture Management
+- `Texture` class loads and scales images
+- Assets:
+  - Player sprites (all directions)
+  - Deer sprite
+  - Tree, Rock, Bush, Grass
+
+### High Scores
+- Score stored **per level** in `level_scores.json`
+- Scores persist between sessions
+- Level progression handled automatically
+
+--------------------------------------------------------------------------------
+
 # Development Roadmap
 
 ## Week 1-2: Core Python Implementation

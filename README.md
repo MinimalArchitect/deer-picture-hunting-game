@@ -3,19 +3,33 @@
 <table>
   <tr>
     <td><img src="screenshots/main-menu.png" width="230"/></td>
-    <td><img src="screenshots/game_preview-1.png" width="230"/></td>
+    <td><img src="screenshots/game_preview.png" width="230"/></td>
   </tr>
   <tr>
     <td align="center">Main Menu</td>
-    <td align="center">Gameplay 1</td>
+    <td align="center">Gameplay</td>
   </tr>
   <tr>
-    <td><img src="screenshots/game_preview-2.png" width="230"/></td>
+    <td><img src="screenshots/game_preview_flickering_hunter.png" width="230"/></td>
     <td><img src="screenshots/game-over-screen.png" width="230"/></td>
   </tr>
   <tr>
-    <td align="center">Gameplay 2</td>
+    <td align="center">Gameplay with flickering hounter</td>
     <td align="center">Game Over</td>
+  </tr>
+<tr>
+    <td><img src="screenshots/choose_level_preview.png" width="230"/></td>
+    <td><img src="screenshots/options_menu.png" width="230"/></td>
+  </tr>
+  <tr>
+    <td align="center">Choose Level Preview</td>
+    <td align="center">Options menu</td>
+  </tr>
+<tr>
+    <td><img src="screenshots/high_scores_menu.png" width="230"/></td>
+  </tr>
+  <tr>
+    <td align="center">High Scores</td>
   </tr>
 </table>
 
@@ -38,21 +52,32 @@ Deer Picture Hunting Game is a grid-based 2D game where you play as a wildlife p
 
 This version uses a simplified grid-based approach to focus on the core game mechanics and object-oriented programming principles rather than complex graphics and physics.
 
+It implements:
+- 20 predefined levels of increasing difficulty
+- Score tracking and persistence across sessions
+- A complete GUI with options and level selection
+- Animated hunter highlighting at spawn
+
+
 ## Features
 
-- **Main Menu System**: Options for single player, hosting, joining, and configuring the game
-- **Grid-based Movement System**: Navigate through the forest using the arrow keys
-- **Dynamic Deer AI**: Deer that react to the player's presence and movement
-- **Photography Mechanics**: Take pictures in the direction you're facing
-- **Varied Environment**: Forest with trees, rocks, and bushes that affect movement and visibility
-- **Scoring System**: Points awarded for unique deer photographs
-- **Timer-based Gameplay**: Limited time to take as many pictures as possible
+- 🎮 **Single Player Mode**
+- 🗺️ **20 Predefined Levels** with increasing difficulty
+- 🦌 **Dynamic Deer AI**: Reacts to proximity with alert and flee behaviors
+- 📸 **Photography Mechanic**: Take pictures in your current facing direction
+- 🧠 **Basic Pathfinding** for deer
+- 🌲 **Environmental Obstacles**: Trees, rocks, and bushes
+- 🕹️ **Main Menu with Mouse Navigation**
+- 📁 **High Score System**: Score saved per level in `level_scores.json`
+- 🔇 **Toggle Sound On/Off**
+- 💾 **Game State Management** (Pause, Game Over, Level End)
+- 🔁 **Level Progression System**
 
 ## Installation
 
 ### Prerequisites
 - Python 3.8 or higher
-- Pygame library
+- `pygame` library
 
 ### Setup
 
@@ -80,56 +105,63 @@ This version uses a simplified grid-based approach to focus on the core game mec
 
 4. Run the game:
    ```bash
-   python 2d/main.py
+   python main.py
    ```
 
 ## How to Play
 
 - **Main Menu**: Click on options with your mouse
-- **Arrow Keys**: Move your photographer (blue triangle) around the map
+- **Arrow Keys**: Move your photographer (hunter) around the map
 - **Space**: Take a picture in the direction you're facing
-- **ESC**: Return to main menu
+- **ESC**: Pause, return to main menu or exit
 - **Goal**: Photograph as many unique deer as possible before time runs out
 - **Scoring**: Each unique deer photographed awards 1 point
 
 ### Environment Elements
 
-- **Green Squares**: Trees (block movement and vision)
-- **Gray Squares**: Rocks (block movement and vision)
-- **Light Green Squares**: Bushes (allow movement but reduce visibility)
-- **Brown Circles**: Deer (your photography targets)
-- **Blue Triangle**: Player (points in the direction you're facing)
+- **Trees**: Trees (block movement and vision)
+- **Rocks**: Rocks (block movement and vision)
+- **Bushes**: Bushes (allow movement but block vision)
+- **Deer**: Deer (your photography targets)
+- **Hunter**: Player (points in the direction you're facing)
 
 ## Implementation Details
 
 The game is implemented using Pygame and employs object-oriented programming principles:
 
-- **Inheritance**: All game entities inherit from a base GameObject class
-- **Encapsulation**: Game state and behavior are encapsulated within appropriate classes
-- **Polymorphism**: Different entities implement their own draw() and update() methods
-- **Abstraction**: Complex behaviors are abstracted into methods
+- 🧱 **OOP Design**: Inheritance, Encapsulation, Polymorphism
+- 🗺️ **Grid Logic**: Tile-based rendering and collision
+- 🦌 **AI**: Deer react based on Manhattan distance
+- 💾 **Persistent Storage**: High scores saved in level_scores.json
+- 🧪 **Extensible Architecture**: Ready for multiplayer and new deer types
 
 The game uses a simple grid-based collision system and implements basic AI for the deer to detect and flee from the player.
 
 ## Code Structure
 
 ```
-2d/
-├── assets/          # Game assets (if any)
-├── docs/            # Other readme files and documentation
-├── screenshots/     # Game play screenshots
-├── README.md        # Main readme file
-├── main.py          # Main game file containing all classes and game loop
-    
+assets/                 # Textures and sound assets
+├── textures/
+└── sounds/
+screenshots/            # Game screenshots for documentation
+src/
+├── core/               # Game engine (Game, GameMap, Levels)
+├── entity/             # Game objects (Player, Deer)
+├── ui/                 # Menu, Buttons, Screens
+└── util/               # Configs, Colors, Math, Sound, Textures
+main.py                 # Entry point
+README.md               # This file
+level_scores.json       # Auto-saved high scores per level
 ```
 
-### Classes Overview
+### Key Classes
 
-- **GameObject**: Base class for all game objects
-- **Player**: Handles player movement, direction, and photography
-- **Deer**: Implements deer behavior, movement, and reaction to player
-- **GameMap**: Manages the game environment and obstacles
-- **Game**: Main game class that brings everything together
+- **Game**: Main loop and state transitions
+- **Player**: Movement, direction, photo logic
+- **Deer**: AI, fleeing, wandering
+- **GameMap**: Obstacles and terrain
+- **Menu, Button**: UI components
+- **Sound, Texture**: Asset managers
 
 ## Development Timeline
 
