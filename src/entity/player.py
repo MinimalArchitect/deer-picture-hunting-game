@@ -34,13 +34,13 @@ class Player(GameObject):
 
         match self.direction:
             case Direction.UP:
-                surface.blit(Texture.hunter_back, pos)
+                surface.blit(Texture.green_hunter_back, pos)
             case Direction.DOWN:
-                surface.blit(Texture.hunter_front, pos)
+                surface.blit(Texture.green_hunter_front, pos)
             case Direction.LEFT:
-                surface.blit(Texture.hunter_left, pos)
+                surface.blit(Texture.green_hunter_left, pos)
             case Direction.RIGHT:
-                surface.blit(Texture.hunter_right, pos)
+                surface.blit(Texture.green_hunter_right, pos)
 
         # Highlight the player with pulsing color of the hunter's clothes glow for 3 seconds
         if time.time() - self.spawn_time < 3:
