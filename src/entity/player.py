@@ -101,18 +101,13 @@ class Player(GameObject):
                 break
 
             # Stop if we hit a solid obstacle
-            if game_map.get_cell(check_x, check_y) in ["TREE", "ROCK"]:
+            if game_map.get_cell(check_x, check_y) in [GridType.TREE, GridType.ROCK, GridType.BUSH]:
                 break
 
             # Check if we see a deer
             for deer in deer_list:
                 if deer.x == check_x and deer.y == check_y:
                     deer_photographed.append(deer)
-
-            # In bushes, reduce visibility (50% chance to continue)
-            # TODO: Check in group if we want 'deterministic' photo behaviour
-            if game_map.get_cell(check_x, check_y) == "BUSH" and random.random() < 0.5:
-                break
 
         # Return any deer we photographed
         return deer_photographed

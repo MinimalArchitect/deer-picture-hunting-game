@@ -1,3 +1,5 @@
+import json
+import os
 import random
 import time
 
@@ -49,6 +51,10 @@ class Game:
         self.score = 0
         self.time_left = 60
         self.last_time = time.time()
+        self.level_scores = {}  # {level_number: highest_score}
+        self.level = 1  # default level selection
+        self.score_file = "level_scores.json"
+        self.load_scores()
 
         self.game_active = True
         self.quit_game = False
@@ -56,7 +62,6 @@ class Game:
     def initialize_game(self):
         """Set up the game objects when starting a new game"""
         # Create game objects
-        self.level = 1  # Track level progression
         self.map = GameMap()
         self.map.generate_predefined_map(level=self.level)
 
@@ -91,6 +96,22 @@ class Game:
 
             if self.map.get_cell(x, y) == GridType.EMPTY:
                 return Player(x, y, clothes_color)
+
+    def save_scores(self):
+        try:
+            with open(self.score_file, "w") as f:
+                # Ensure keys are strings for JSON compatibility
+                json.dump({str(k): v for k, v in self.level_scores.items()}, f)
+        except Exception as e:
+            print("Error saving scores:", e)
+
+    def load_scores(self):
+        if os.path.exists(self.score_file):
+            try:
+                with open(self.score_file, "r") as f:
+                    self.level_scores = json.load(f)
+            except Exception as e:
+                print("Error loading scores:", e)
 
     def handle_events(self):
         """Handle pygame events"""
@@ -329,8 +350,7 @@ class Game:
             self.clock.tick(30)
         # Handle menu choice
         if menu_choice in ["single_player", "host_game", "join_game"]:
-            self.initialize_game()
-            self.game_state = GameState.PLAYING
+            self.handle_level_selection()
 
     def handle_playing_state(self):
         # Game loop
@@ -361,34 +381,131 @@ class Game:
             pygame.display.flip()
             self.clock.tick(10)
 
-    def handle_game_over_state(self):
-        # Game over screen
-        game_over_active = True
-        # Clear event queue before showing game over screen
-        pygame.event.clear()
-        while game_over_active and not self.quit_game:
-            # Process events
+    def handle_level_complete_state(self):
+        if self.score > 0:
+            level_key = str(self.level)
+            self.level_scores[level_key] = max(self.score, self.level_scores.get(level_key, 0))
+            self.save_scores()
+
+        continue_btn = Button(WINDOW_WIDTH // 2 - 100, 260, 200, 50, "Next Level", Color.BUTTON, Color.BUTTON_HOVER)
+        menu_btn = Button(WINDOW_WIDTH // 2 - 100, 330, 200, 50, "Main Menu", Color.BUTTON, Color.BUTTON_HOVER)
+
+        while not self.quit_game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit_game = True
-                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                    game_over_active = False
-                    self.game_state = GameState.MENU
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if continue_btn.is_clicked(mouse_pos, True):
+                        self.level += 1
+                        self.initialize_game()
+                        self.game_state = GameState.PLAYING
+                        return
+                    elif menu_btn.is_clicked(mouse_pos, True):
+                        self.game_state = GameState.MENU
+                        return
 
-            # Draw game over screen
             self.screen.fill(Color.WHITE)
+            font = pygame.font.SysFont(None, 48)
+            complete_text = font.render(f"Level {self.level} Complete!", True, Color.BLACK)
+            score_text = font.render(f"Score: {self.score}", True, Color.BLACK)
+            self.screen.blit(complete_text, (WINDOW_WIDTH // 2 - 180, 150))
+            self.screen.blit(score_text, (WINDOW_WIDTH // 2 - 100, 200))
 
-            font = pygame.font.SysFont(None, 72)
-            game_over_text = font.render("GAME OVER", True, Color.BLACK)
-            final_score = font.render(f"Final Score: {self.score}", True, Color.BLACK)
+            for btn in [continue_btn, menu_btn]:
+                btn.draw(self.screen, btn.check_hover(pygame.mouse.get_pos()))
 
-            # Add instructions
-            instructions_font = pygame.font.SysFont(None, 32)
-            instructions = instructions_font.render("Press any key to continue", True, Color.BLACK)
+            pygame.display.flip()
+            self.clock.tick(30)
 
-            self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
-            self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
-            self.screen.blit(instructions, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 80))
+    def handle_game_over_state(self):
+        any_photographed = any(deer.photographed for deer in self.deer)
+        if any_photographed:
+            self.handle_level_complete_state()
+        else:
+            # Game over screen
+            game_over_active = True
+            # Clear event queue before showing game over screen
+            pygame.event.clear()
+            while game_over_active and not self.quit_game:
+                # Process events
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.quit_game = True
+                    elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                        game_over_active = False
+                        self.game_state = GameState.MENU
+
+                # Draw game over screen
+                self.screen.fill(Color.WHITE)
+
+                font = pygame.font.SysFont(None, 72)
+                game_over_text = font.render("GAME OVER", True, Color.BLACK)
+                final_score = font.render(f"Final Score: {self.score}", True, Color.BLACK)
+
+                # Add instructions
+                instructions_font = pygame.font.SysFont(None, 32)
+                instructions = instructions_font.render("Press any key to continue", True, Color.BLACK)
+
+                self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
+                self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
+                self.screen.blit(instructions, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 80))
+
+                pygame.display.flip()
+                self.clock.tick(30)
+
+    def handle_level_selection(self):
+        pygame.event.clear()
+        level_buttons = []
+        columns = 5
+        spacing = 10
+        button_width = 100
+        button_height = 40
+        start_x = 100
+        start_y = 180
+        total_levels = 20
+
+        back_btn = Button(WINDOW_WIDTH // 2 - 60, start_y + ((total_levels // columns) + 2) * (button_height + spacing),
+                          120, 40, "Back", Color.BUTTON, Color.BUTTON_HOVER)
+
+        for i in range(total_levels):
+            row = i // columns
+            col = i % columns
+            x = start_x + col * (button_width + spacing)
+            y = start_y + row * (button_height + spacing)
+            level_key = str(i + 1)
+            score = self.level_scores.get(level_key, None)
+            label = f"{i + 1}" if score is None else f"{i + 1} ({score})"
+            btn_color = Color.BUTTON_DONE if score is not None else Color.BUTTON
+            btn_hover = Color.BUTTON_HOVER
+            level_buttons.append(Button(x, y, button_width, button_height, label, btn_color, btn_hover))
+
+        selecting = True
+        while selecting and not self.quit_game:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game = True
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if back_btn.is_clicked(mouse_pos, True):
+                        self.game_state = GameState.MENU
+                        return
+                    for i, btn in enumerate(level_buttons):
+                        if btn.is_clicked(mouse_pos, True):
+                            self.level = i + 1
+                            self.initialize_game()
+                            self.game_state = GameState.PLAYING
+                            return
+
+            self.screen.fill(Color.BACKGROUND)
+            title_font = pygame.font.SysFont(None, 64)
+            title_text = title_font.render("Choose Level", True, Color.BLACK)
+            self.screen.blit(title_text, (WINDOW_WIDTH // 2 - 180, 100))
+
+            for btn in level_buttons:
+                btn.draw(self.screen, btn.check_hover(pygame.mouse.get_pos()))
+
+            back_btn.draw(self.screen, back_btn.check_hover(pygame.mouse.get_pos()))
 
             pygame.display.flip()
             self.clock.tick(30)

@@ -8,3 +8,4 @@ class Color:
     BACKGROUND = (230, 240, 240) # Light blue-gray background
     BUTTON = (180, 210, 180)  # Light green
     BUTTON_HOVER = (150, 200, 150)  # Slightly darker green
+    BUTTON_DONE = (0, 180, 0)  # Slightly darker green
