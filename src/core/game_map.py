@@ -1,6 +1,7 @@
 import random
 
 from src.util.config import GRID_HEIGHT, GRID_WIDTH, GRID_SIZE
+from src.util.predefined_levels import LEVELS
 from src.util.texture import Texture
 
 
@@ -18,7 +19,7 @@ class GameMap:
     def __init__(self):
         self.grid = [[GridType.EMPTY for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
 
-    def generate_map(self):
+    def generate_random_map(self):
         """Generate a random map with trees, rocks, bushes"""
         # Add trees (20% of grid)
         for _ in range(int(GRID_WIDTH * GRID_HEIGHT * 0.2)):
@@ -39,6 +40,26 @@ class GameMap:
             y = random.randint(0, GRID_HEIGHT - 1)
             if self.grid[x][y] == GridType.EMPTY:
                 self.grid[x][y] = GridType.BUSH
+
+    def generate_predefined_map(self, level=1):
+        """Load predefined level layout"""
+        self.clear()
+        layout = LEVELS.get(level, LEVELS[max(LEVELS.keys())])
+        for y, row in enumerate(layout):
+            for x, char in enumerate(row):
+                if 0 <= x < GRID_WIDTH and 0 <= y < GRID_HEIGHT:
+                    match char:
+                        case 'T':
+                            self.grid[x][y] = GridType.TREE
+                        case 'R':
+                            self.grid[x][y] = GridType.ROCK
+                        case 'B':
+                            self.grid[x][y] = GridType.BUSH
+                        case _:
+                            self.grid[x][y] = GridType.EMPTY
+
+    def clear(self):
+        self.grid = [[GridType.EMPTY for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
 
     def get_cell(self, x, y):
         """Get the type of cell at the given coordinates"""

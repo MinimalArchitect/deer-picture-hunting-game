@@ -56,8 +56,9 @@ class Game:
     def initialize_game(self):
         """Set up the game objects when starting a new game"""
         # Create game objects
+        self.level = 1  # Track level progression
         self.map = GameMap()
-        self.map.generate_map()
+        self.map.generate_predefined_map(level=self.level)
 
         # Place player in an empty cell
         self.player = self.place_hunter_in_empty_cell(Color.LIGHT_GREEN)
