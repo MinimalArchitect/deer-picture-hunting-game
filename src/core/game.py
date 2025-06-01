@@ -15,6 +15,9 @@ from src.util.config import WINDOW_WIDTH, GRID_WIDTH, GRID_HEIGHT, WINDOW_HEIGHT
 from src.util.sound import Sound
 from src.util.texture import Texture
 
+from src.util.score_manager import ScoreManager
+from src.ui.name_input_dialog import NameInputDialog
+
 
 class GameState:
     """Enum for game states"""
@@ -59,6 +62,10 @@ class Game:
         self.game_active = True
         self.quit_game = False
 
+        self.score_manager = ScoreManager()
+        self.name_dialog = None
+        self.game_start_time = 0
+
     def initialize_game(self):
         """Set up the game objects when starting a new game"""
         # Create game objects
@@ -78,6 +85,8 @@ class Game:
         self.time_left = 60  # 60 seconds
         self.last_time = time.time()
         self.game_state = GameState.PLAYING
+
+        self.game_start_time = time.time()
 
     def place_in_empty_cell(self, object_class):
         """Place a new object in a random empty cell"""
@@ -292,55 +301,66 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.quit_game = True
 
-                # Handle menu selection
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                # Handle menu selection based on current menu
+                if self.menu.current_menu == MenuType.HIGH_SCORES:
+                    # Handle high score screen events
+                    if hasattr(self.menu, 'high_score_screen'):
+                        result = self.menu.high_score_screen.handle_event(event)
+                        if result == "back":
+                            self.menu.current_menu = MenuType.MAIN
+                            # Clean up the high score screen
+                            if hasattr(self.menu, 'high_score_screen'):
+                                delattr(self.menu, 'high_score_screen')
+                
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
-                    # Check button clicks
-                    for i, button in enumerate(self.menu.main_buttons):
-                        if button.is_clicked(mouse_pos, True):
-                            if i == 0:  # Single Player
-                                menu_choice = "single_player"
-                                menu_active = False
-                            elif i == 1:  # Host Game
-                                menu_choice = "host_game"
-                                menu_active = False
-                            elif i == 2:  # Join Game
-                                menu_choice = "join_game"
-                                menu_active = False
-                            elif i == 3:  # Options
-                                self.menu.current_menu = "options"
-                            elif i == 4:  # High Scores
-                                self.menu.current_menu = "high_scores"
-                            elif i == 5:  # Exit
-                                self.quit_game = True
+                    # Check button clicks only for main menu
+                    if self.menu.current_menu == MenuType.MAIN:
+                        for i, button in enumerate(self.menu.main_buttons):
+                            if button.is_clicked(mouse_pos, True):
+                                if i == 0:  # Single Player
+                                    menu_choice = "single_player"
+                                    menu_active = False
+                                elif i == 1:  # Host Game
+                                    menu_choice = "host_game"
+                                    menu_active = False
+                                elif i == 2:  # Join Game
+                                    menu_choice = "join_game"
+                                    menu_active = False
+                                elif i == 3:  # Options
+                                    self.menu.current_menu = MenuType.OPTIONS
+                                elif i == 4:  # High Scores
+                                    self.menu.current_menu = MenuType.HIGH_SCORES
+                                elif i == 5:  # Exit
+                                    self.quit_game = True
 
             # Draw menu
             if not self.quit_game:
                 self.screen.fill(Color.BACKGROUND)
 
-                # Draw title
-                title_text = self.menu.title_font.render("Deer Picture Hunting", True, Color.BLACK)
-                title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
-                self.screen.blit(title_text, title_rect)
-
-                # Draw version text
-                version_font = pygame.font.SysFont(None, 24)
-                version_text = version_font.render("2D Grid-Based Version", True, Color.BLACK)
-                version_rect = version_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
-                self.screen.blit(version_text, version_rect)
-
                 if self.menu.current_menu == MenuType.MAIN:
+                    # Draw title
+                    title_text = self.menu.title_font.render("Deer Picture Hunting", True, Color.BLACK)
+                    title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
+                    self.screen.blit(title_text, title_rect)
+
+                    # Draw version text
+                    version_font = pygame.font.SysFont(None, 24)
+                    version_text = version_font.render("2D Grid-Based Version", True, Color.BLACK)
+                    version_rect = version_text.get_rect(center=(WINDOW_WIDTH // 2, 120))
+                    self.screen.blit(version_text, version_rect)
+
                     # Draw buttons
                     for button in self.menu.main_buttons:
                         is_hovered = button.check_hover(pygame.mouse.get_pos())
                         button.draw(self.screen, is_hovered)
-                # elif self.menu.current_menu == MenuType.OPTIONS:
-                #     self.menu.draw_options()
+                        
                 elif self.menu.current_menu == MenuType.OPTIONS:
                     result = self.menu.draw_options(self.sound_enabled)
                     if result == "toggle_sound":
                         self.sound_enabled = not self.sound_enabled
                         pygame.time.wait(200)  # Prevent double click
+                        
                 elif self.menu.current_menu == MenuType.HIGH_SCORES:
                     self.menu.draw_high_scores()
 
@@ -348,6 +368,7 @@ class Game:
 
             # Control frame rate
             self.clock.tick(30)
+            
         # Handle menu choice
         if menu_choice in ["single_player", "host_game", "join_game"]:
             self.handle_level_selection()
@@ -382,6 +403,7 @@ class Game:
             self.clock.tick(10)
 
     def handle_level_complete_state(self):
+        # Save to old system too for backward compatibility
         if self.score > 0:
             level_key = str(self.level)
             self.level_scores[level_key] = max(self.score, self.level_scores.get(level_key, 0))
@@ -397,10 +419,15 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
                     if continue_btn.is_clicked(mouse_pos, True):
-                        self.level += 1
-                        self.initialize_game()
-                        self.game_state = GameState.PLAYING
-                        return
+                        if self.level < 20:  # Don't go beyond level 20
+                            self.level += 1
+                            self.initialize_game()
+                            self.game_state = GameState.PLAYING
+                            return
+                        else:
+                            # Completed all levels, go to menu
+                            self.game_state = GameState.MENU
+                            return
                     elif menu_btn.is_clicked(mouse_pos, True):
                         self.game_state = GameState.MENU
                         return
@@ -409,6 +436,13 @@ class Game:
             font = pygame.font.SysFont(None, 48)
             complete_text = font.render(f"Level {self.level} Complete!", True, Color.BLACK)
             score_text = font.render(f"Score: {self.score}", True, Color.BLACK)
+            
+            # Show if it was a high score
+            record = self.score_manager.get_level_record(self.level)
+            if record and record.score == self.score:
+                record_text = font.render("NEW RECORD!", True, Color.GREEN)
+                self.screen.blit(record_text, (WINDOW_WIDTH // 2 - 120, 120))
+            
             self.screen.blit(complete_text, (WINDOW_WIDTH // 2 - 180, 150))
             self.screen.blit(score_text, (WINDOW_WIDTH // 2 - 100, 200))
 
@@ -420,39 +454,158 @@ class Game:
 
     def handle_game_over_state(self):
         any_photographed = any(deer.photographed for deer in self.deer)
+        
         if any_photographed:
-            self.handle_level_complete_state()
+            # Level completed with some deer photographed
+            if self.score > 0:
+                # Calculate time ONCE at the beginning
+                time_taken = time.time() - self.game_start_time
+                
+                # Check if it's a high score and we haven't shown dialog yet
+                if self.score_manager.is_high_score(self.level, self.score) and self.name_dialog is None:
+                    print(f"Game completed. Score: {self.score}, Time: {time_taken:.2f}s")
+                    print("This is a high score! Showing name dialog...")
+                    
+                    # Store the time in an instance variable so we don't recalculate
+                    self.final_time = time_taken
+                    
+                    # Initialize name dialog
+                    self.name_dialog = NameInputDialog(self.screen, 
+                                                    self.score_manager.get_player_name())
+                    return  # Exit here to let the dialog run
+                
+                # If dialog exists and is active, handle it
+                if self.name_dialog and self.name_dialog.active:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self.quit_game = True
+                            return
+                        self.name_dialog.handle_event(event)
+                    
+                    self.name_dialog.update(self.clock.get_time())
+                    self.name_dialog.draw()
+                    pygame.display.flip()
+                    self.clock.tick(30)
+                    return  # Stay in this state while dialog is active
+                
+                # Dialog completed or not needed
+                if self.name_dialog and not self.name_dialog.active:
+                    print(f"Dialog closed. Result: {self.name_dialog.result}")
+                    
+                    # Use the stored time, not a new calculation
+                    final_time = getattr(self, 'final_time', time_taken)
+                    
+                    if self.name_dialog.result and self.name_dialog.result.strip():
+                        # Player entered a name
+                        player_name = self.name_dialog.result.strip()
+                        print(f"Dialog result: '{player_name}'")
+                        print(f"About to save score: Level={self.level}, Score={self.score}, Time={final_time:.2f}, Player={player_name}")
+                        self.score_manager.add_score(self.level, self.score, final_time, player_name)
+                    else:
+                        # Player cancelled or entered empty name
+                        print("No valid name entered, using default")
+                        self.score_manager.add_score(self.level, self.score, final_time, "Player")
+                    
+                    self.name_dialog = None
+                    # Clear the stored time
+                    if hasattr(self, 'final_time'):
+                        delattr(self, 'final_time')
+                        
+                elif not self.score_manager.is_high_score(self.level, self.score):
+                    # Not a high score, save with current player name
+                    print("Not a high score, saving normally")
+                    self.score_manager.add_score(self.level, self.score, time_taken)
+            
+            # Move to level complete state
+            print("Moving to level complete state")
+            self.game_state = GameState.PLAYING  # Temporary state change
+            self._show_level_complete()
         else:
-            # Game over screen
-            game_over_active = True
-            # Clear event queue before showing game over screen
-            pygame.event.clear()
-            while game_over_active and not self.quit_game:
-                # Process events
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.quit_game = True
-                    elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                        game_over_active = False
+            # No deer photographed - game over
+            print("No deer photographed, showing game over")
+            self.game_state = GameState.PLAYING  # Temporary state change
+            self._show_game_over_screen()
+
+    def _show_level_complete(self):
+        """Show level complete screen"""
+        # DON'T save to old system anymore - it overwrites ScoreManager data
+        # if self.score > 0:
+        #     level_key = str(self.level)
+        #     self.level_scores[level_key] = max(self.score, self.level_scores.get(level_key, 0))
+        #     self.save_scores()
+
+        continue_btn = Button(WINDOW_WIDTH // 2 - 100, 260, 200, 50, "Next Level", Color.BUTTON, Color.BUTTON_HOVER)
+        menu_btn = Button(WINDOW_WIDTH // 2 - 100, 330, 200, 50, "Main Menu", Color.BUTTON, Color.BUTTON_HOVER)
+
+        level_complete_active = True
+        while level_complete_active and not self.quit_game:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game = True
+                    return
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if continue_btn.is_clicked(mouse_pos, True):
+                        if self.level < 20:  # Don't go beyond level 20
+                            self.level += 1
+                            self.initialize_game()
+                            return  # Exit this method
+                        else:
+                            # Completed all levels, go to menu
+                            self.game_state = GameState.MENU
+                            return
+                    elif menu_btn.is_clicked(mouse_pos, True):
                         self.game_state = GameState.MENU
+                        return
 
-                # Draw game over screen
-                self.screen.fill(Color.WHITE)
+            self.screen.fill(Color.WHITE)
+            font = pygame.font.SysFont(None, 48)
+            complete_text = font.render(f"Level {self.level} Complete!", True, Color.BLACK)
+            score_text = font.render(f"Score: {self.score}", True, Color.BLACK)
+            
+            # Show if it was a high score
+            record = self.score_manager.get_level_record(self.level)
+            if record and record.score == self.score and record.player_name != "Legacy Player":
+                record_text = font.render("NEW RECORD!", True, Color.GREEN)
+                self.screen.blit(record_text, (WINDOW_WIDTH // 2 - 120, 120))
+            
+            self.screen.blit(complete_text, (WINDOW_WIDTH // 2 - 180, 150))
+            self.screen.blit(score_text, (WINDOW_WIDTH // 2 - 100, 200))
 
-                font = pygame.font.SysFont(None, 72)
-                game_over_text = font.render("GAME OVER", True, Color.BLACK)
-                final_score = font.render(f"Final Score: {self.score}", True, Color.BLACK)
+            for btn in [continue_btn, menu_btn]:
+                btn.draw(self.screen, btn.check_hover(pygame.mouse.get_pos()))
 
-                # Add instructions
-                instructions_font = pygame.font.SysFont(None, 32)
-                instructions = instructions_font.render("Press any key to continue", True, Color.BLACK)
+            pygame.display.flip()
+            self.clock.tick(30)
 
-                self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
-                self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
-                self.screen.blit(instructions, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 80))
+    def _show_game_over_screen(self):
+        """Show game over screen for when no deer were photographed"""
+        game_over_active = True
+        pygame.event.clear()
+        
+        while game_over_active and not self.quit_game:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game = True
+                    return
+                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    game_over_active = False
+                    self.game_state = GameState.MENU
+                    return
 
-                pygame.display.flip()
-                self.clock.tick(30)
+            self.screen.fill(Color.WHITE)
+            font = pygame.font.SysFont(None, 72)
+            game_over_text = font.render("GAME OVER", True, Color.BLACK)
+            final_score = font.render(f"Final Score: {self.score}", True, Color.BLACK)
+            instructions_font = pygame.font.SysFont(None, 32)
+            instructions = instructions_font.render("Press any key to continue", True, Color.BLACK)
+
+            self.screen.blit(game_over_text, (WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50))
+            self.screen.blit(final_score, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 20))
+            self.screen.blit(instructions, (WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 + 80))
+
+            pygame.display.flip()
+            self.clock.tick(30)
 
     def handle_level_selection(self):
         pygame.event.clear()

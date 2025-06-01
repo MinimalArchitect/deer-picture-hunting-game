@@ -77,67 +77,25 @@ class Menu:
         return None
 
     def draw_high_scores(self):
-        """Draw the high scores menu (placeholder)"""
-        # Load scores from file
-        score_file = "level_scores.json"
-        self.level_scores = {}
-        if os.path.exists(score_file):
-            try:
-                with open(score_file, "r") as f:
-                    self.level_scores = json.load(f)
-            except Exception as e:
-                print("Error loading scores:", e)
-
-        # Draw background
+        """Draw the high scores menu using the new ScoreManager"""
+        # Create high score screen if not exists
+        if not hasattr(self, 'high_score_screen'):
+            from src.util.score_manager import ScoreManager
+            from src.ui.high_score_screen import HighScoreScreen
+            score_manager = ScoreManager()
+            self.high_score_screen = HighScoreScreen(self.screen, score_manager)
+        
+        # Clear the screen first
         self.screen.fill(Color.BACKGROUND)
+        
+        # Update and draw the high score screen
+        self.high_score_screen.update()
+        self.high_score_screen.draw()
+        
+        # Don't handle events here - let the main menu loop handle them
+        # The main menu loop will check for clicks and call handle_event
 
-        # Draw title
-        font = pygame.font.SysFont(None, 64)
-        title_text = font.render("High Scores", True, Color.BLACK)
-        self.screen.blit(title_text, (WINDOW_WIDTH // 2 - 130, 60))
-
-        # Draw scores in two columns
-        score_font = pygame.font.SysFont(None, 32)
-        column_x = [WINDOW_WIDTH // 2 - 180, WINDOW_WIDTH // 2 + 20]
-        y_start = 140
-        line_spacing = 30
-
-        for i, level in enumerate(range(1, 21)):
-            col = 0 if level <= 10 else 1
-            row = i if level <= 10 else i - 10
-            y = y_start + row * line_spacing
-            key = str(level)
-            score = self.level_scores.get(key, None)
-            text = f"Level {level}: {score if score is not None else '-'}"
-            line = score_font.render(text, True, Color.BLACK)
-            self.screen.blit(line, (column_x[col], y))
-
-        # Back and Reset buttons
-        back_btn = Button(WINDOW_WIDTH // 2 - 140, 500, 120, 40, "Back", Color.BUTTON, Color.BUTTON_HOVER)
-        reset_btn = Button(WINDOW_WIDTH // 2 + 20, 500, 120, 40, "Reset", Color.BUTTON, Color.BUTTON_HOVER)
-
-        back_btn.draw(self.screen, back_btn.check_hover(pygame.mouse.get_pos()))
-        reset_btn.draw(self.screen, reset_btn.check_hover(pygame.mouse.get_pos()))
-
-        pygame.display.flip()
-
-        # Handle button clicks
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if back_btn.is_clicked(mouse_pos, True):
-                    self.current_menu = MenuType.MAIN
-                elif reset_btn.is_clicked(mouse_pos, True):
-                    self.level_scores = {}
-                    if os.path.exists(score_file):
-                        try:
-                            os.remove(score_file)
-                        except Exception as e:
-                            print("Error resetting score file:", e)
-
-def draw_coming_soon_screen(self, text: str):
+'''def draw_coming_soon_screen(self, text: str):
         """Draw the placeholder coming soon screen"""
         # Simple "Coming soon" message and back button
         font = pygame.font.SysFont(None, 48)
@@ -154,4 +112,4 @@ def draw_coming_soon_screen(self, text: str):
 
         # Check for back button click
         if is_back_button_hovered and pygame.mouse.get_pressed()[0]:
-            self.current_menu = MenuType.MAIN
+            self.current_menu = MenuType.MAIN'''

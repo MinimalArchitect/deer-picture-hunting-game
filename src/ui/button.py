@@ -14,7 +14,11 @@ class Button:
         self.is_hovered = False
         self.font = pygame.font.SysFont(None, 32)
 
-    def draw(self, surface, is_hovered):
+    def draw(self, surface, is_hovered=None):
+        # Handle case where is_hovered is not provided
+        if is_hovered is None:
+            is_hovered = self.check_hover(pygame.mouse.get_pos())
+            
         # Draw button with appropriate color based on hover state
         color = self.hover_color if is_hovered else self.color
         pygame.draw.rect(surface, color, self.rect)
