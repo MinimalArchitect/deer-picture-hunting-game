@@ -15,7 +15,7 @@
     <td><img src="screenshots/game_over-new_record-screen.png" width="230"/></td>
   </tr>
   <tr>
-    <td align="center">Gameplay with flickering hounter</td>
+    <td align="center">Gameplay with flickering hunter</td>
     <td align="center">Name dialog box</td>
     <td align="center">Game Over/New Record</td>
   </tr>
