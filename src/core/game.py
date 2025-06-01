@@ -628,7 +628,7 @@ class Game:
             y = start_y + row * (button_height + spacing)
             level_key = str(i + 1)
             score = self.level_scores.get(level_key, None)
-            label = f"{i + 1}" if score is None else f"{i + 1} ({score})"
+            label = f"{i + 1}" 
             btn_color = Color.BUTTON_DONE if score is not None else Color.BUTTON
             btn_hover = Color.BUTTON_HOVER
             level_buttons.append(Button(x, y, button_width, button_height, label, btn_color, btn_hover))

@@ -96,7 +96,7 @@ class HighScoreScreen:
     def _draw_single_level(self):
         """Draw high scores for a single level"""
         # Title
-        title_text = self.font_large.render(f"Level {self.current_level} High Scores", 
+        title_text = self.font_large.render(f"Level {self.current_level} Scores", 
                                           True, Color.TEXT)
         title_rect = title_text.get_rect(center=(400, 50))
         self.screen.blit(title_text, title_rect)

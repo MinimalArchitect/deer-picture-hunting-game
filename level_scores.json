@@ -6,6 +6,22 @@
       "level": 1,
       "date": "2025-06-01 22:38:34",
       "time_taken": 60.10567259788513
+    },
+    {
+      "player_name": "Pratik",
+      "score": 3,
+      "level": 1,
+      "date": "2025-06-01 23:15:37",
+      "time_taken": 60.1390917301178
+    }
+  ],
+  "2": [
+    {
+      "player_name": "Pratik",
+      "score": 5,
+      "level": 2,
+      "date": "2025-06-01 22:53:53",
+      "time_taken": 60.14822220802307
     }
   ]
 }

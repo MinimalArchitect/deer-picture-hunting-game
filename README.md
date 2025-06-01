@@ -11,11 +11,13 @@
   </tr>
   <tr>
     <td><img src="screenshots/game_preview_flickering_hunter.png" width="230"/></td>
-    <td><img src="screenshots/game-over-screen.png" width="230"/></td>
+    <td><img src="screenshots/name-dialog.png" width="230"/></td>
+    <td><img src="screenshots/game_over-new_record-screen.png" width="230"/></td>
   </tr>
   <tr>
     <td align="center">Gameplay with flickering hounter</td>
-    <td align="center">Game Over</td>
+    <td align="center">Name dialog box</td>
+    <td align="center">Game Over/New Record</td>
   </tr>
 <tr>
     <td><img src="screenshots/choose_level_preview.png" width="230"/></td>
@@ -26,10 +28,14 @@
     <td align="center">Options menu</td>
   </tr>
 <tr>
+    <td><img src="screenshots/scores_menu1.png" width="230"/></td>
+    <td><img src="screenshots/scores_menu2.png" width="230"/></td>
     <td><img src="screenshots/high_scores_menu.png" width="230"/></td>
   </tr>
   <tr>
-    <td align="center">High Scores</td>
+    <td align="center">Scores - Level-1</td>
+    <td align="center">Scores - Level-2</td>
+    <td align="center">High Scores - all levels</td>
   </tr>
 </table>
 
@@ -68,7 +74,7 @@ It implements:
 - 🧠 **Basic Pathfinding** for deer
 - 🌲 **Environmental Obstacles**: Trees, rocks, and bushes
 - 🕹️ **Main Menu with Mouse Navigation**
-- 📁 **High Score System**: Score saved per level in `level_scores.json`
+- 📁 **High Score System**: Score display per level/all levels in `level_scores.json`
 - 🔇 **Toggle Sound On/Off**
 - 💾 **Game State Management** (Pause, Game Over, Level End)
 - 🔁 **Level Progression System**
