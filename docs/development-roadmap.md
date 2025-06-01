@@ -112,7 +112,7 @@ The main menu provides entry points to different game modes and settings:
   - Implement actual multiplayer functionality for Host/Join
   - Complete Options and High Scores screens
 
-### ⬜ High Score System
+### ✅ High Score System
 The high score system will track and display top performances:
 - **Data storage**: Use JSON file format to persist scores between sessions
 - **Score structure**: Store player name, score, date/time, and game settings
