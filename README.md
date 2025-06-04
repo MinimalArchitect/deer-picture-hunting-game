@@ -179,8 +179,6 @@ This 2D grid-based version represents the first phase of a three-part project:
 
 Each implementation aims to explore the object-oriented features of the respective language.
 
-For detailed development plan click [here](docs/development-roadmap.md)
-
 ## Assignment Context
 
 This game is developed as part of the "Advanced Object-Oriented Programming" course at TU Wien. The assignment involves creating three versions of the same game in different object-oriented languages:
