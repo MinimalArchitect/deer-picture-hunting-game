@@ -48,8 +48,9 @@ A simplified 2D grid-based implementation of the Deer Picture Hunting Game devel
 - [Installation](#installation)
 - [How to Play](#how-to-play)
 - [Implementation Details](#implementation-details)
+- [Architecture](#architecture)
 - [Code Structure](#code-structure)
-- [Development Timeline](#development-timeline)
+- [Development Status](#development-status)
 - [Assignment Context](#assignment-context)
 
 ## Overview
@@ -58,26 +59,34 @@ Deer Picture Hunting Game is a grid-based 2D game where you play as a wildlife p
 
 This version uses a simplified grid-based approach to focus on the core game mechanics and object-oriented programming principles rather than complex graphics and physics.
 
-It implements:
-- 20 predefined levels of increasing difficulty
-- Score tracking and persistence across sessions
-- A complete GUI with options and level selection
-- Animated hunter highlighting at spawn
+## Current Implementation Status
 
+✅ **Phase 1 & 2 Complete**: Core game with clean state machine architecture  
+🚧 **Phase 3**: Specialized states (Game Over, Level Selection, High Score)  
+⏳ **Phase 4**: Networking implementation  
+⏳ **Phase 5**: Smalltalk port  
+⏳ **Phase 6**: Eiffel port  
 
 ## Features
 
-- 🎮 **Single Player Mode**
-- 🗺️ **20 Predefined Levels** with increasing difficulty
-- 🦌 **Dynamic Deer AI**: Reacts to proximity with alert and flee behaviors
-- 📸 **Photography Mechanic**: Take pictures in your current facing direction
-- 🧠 **Basic Pathfinding** for deer
-- 🌲 **Environmental Obstacles**: Trees, rocks, and bushes
-- 🕹️ **Main Menu with Mouse Navigation**
-- 📁 **High Score System**: Score display per level/all levels in `level_scores.json`
-- 🔇 **Toggle Sound On/Off**
-- 💾 **Game State Management** (Pause, Game Over, Level End)
-- 🔁 **Level Progression System**
+### 🎮 **Core Gameplay**
+- **Single Player Mode** with full functionality
+- **20 Predefined Levels** with increasing difficulty
+- **Dynamic Deer AI**: Proximity-based alert and flee behaviors
+- **Photography Mechanic**: Directional picture taking
+- **Environmental Obstacles**: Trees, rocks, and bushes affecting movement and vision
+
+### 🏗️ **Architecture**
+- **Clean State Machine**: Modular state-based architecture ready for networking
+- **Professional OOP Design**: Proper inheritance, encapsulation, and polymorphism
+- **Extensible Framework**: Easy to add new game modes and features
+
+### 💾 **Persistence & UI**
+- **Advanced High Score System**: Per-level tracking with player names and timestamps
+- **Complete Menu System**: Main menu, options, level selection, high scores
+- **Game State Management**: Pause, resume, level progression
+- **Sound System**: Toggle-able sound effects
+- **Visual Polish**: Animated hunter highlighting, smooth transitions
 
 ## Installation
 
@@ -119,75 +128,172 @@ It implements:
 - **Main Menu**: Click on options with your mouse
 - **Arrow Keys**: Move your photographer (hunter) around the map
 - **Space**: Take a picture in the direction you're facing
-- **ESC**: Pause, return to main menu or exit
+- **ESC**: Pause game, return to main menu, or exit
 - **Goal**: Photograph as many unique deer as possible before time runs out
 - **Scoring**: Each unique deer photographed awards 1 point
 
 ### Environment Elements
 
-- **Trees**: Trees (block movement and vision)
-- **Rocks**: Rocks (block movement and vision)
-- **Bushes**: Bushes (allow movement but block vision)
-- **Deer**: Deer (your photography targets)
-- **Hunter**: Player (points in the direction you're facing)
+- **🌲 Trees**: Block movement and vision
+- **🗿 Rocks**: Block movement and vision  
+- **🌿 Bushes**: Allow movement but block vision
+- **🦌 Deer**: Your photography targets
+- **🏃 Hunter**: Player character (points in facing direction)
 
 ## Implementation Details
 
-The game is implemented using Pygame and employs object-oriented programming principles:
+The game showcases advanced object-oriented programming principles:
 
-- 🧱 **OOP Design**: Inheritance, Encapsulation, Polymorphism
-- 🗺️ **Grid Logic**: Tile-based rendering and collision
-- 🦌 **AI**: Deer react based on Manhattan distance
-- 💾 **Persistent Storage**: High scores saved in level_scores.json
-- 🧪 **Extensible Architecture**: Ready for multiplayer and new deer types
+### 🏗️ **Architecture Patterns**
+- **State Machine Pattern**: Clean separation of game states (Menu, Playing, Paused, etc.)
+- **Observer Pattern**: Event-driven UI and game logic
+- **Strategy Pattern**: Different deer AI behaviors
+- **Template Method**: Consistent state lifecycle management
 
-The game uses a simple grid-based collision system and implements basic AI for the deer to detect and flee from the player.
+### 🧱 **OOP Design**
+- **Inheritance Hierarchies**: GameObject → Player/Deer, GameState → MenuState/PlayingState
+- **Polymorphism**: Different entities with unified interfaces
+- **Encapsulation**: Proper data hiding and interface design
+- **Abstraction**: Clean abstractions for game logic and rendering
+
+### 💾 **Data Management**
+- **Persistent Storage**: JSON-based high score system with full metadata
+- **State Persistence**: Game state preservation across pause/resume
+- **Configuration Management**: Centralized game settings and level data
+
+## Architecture
+
+### State Machine Design
+```
+┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│ Menu State  │───▶│ Level Selection  │───▶│ Playing State   │
+└─────────────┘    └──────────────────┘    └─────────────────┘
+       ▲                                            │
+       │            ┌─────────────────┐             ▼
+       └────────────│ Paused State    │◄────────────┤
+                    └─────────────────┘             │
+       ┌─────────────────────────────────────────────┘
+       ▼
+┌─────────────────┐    ┌──────────────────┐
+│ Game Over State │───▶│ High Score State │
+└─────────────────┘    └──────────────────┘
+```
+
+### Class Hierarchy
+```
+GameState (Abstract)
+├── TransitionableState
+│   ├── MenuState
+│   ├── PlayingState
+│   └── PausedState
+└── GameOverState
+    ├── LevelSelectionState
+    └── HighScoreState
+
+GameObject (Abstract)
+├── Player
+└── Deer
+
+StateMachine
+└── manages all state transitions
+```
 
 ## Code Structure
 
 ```
-assets/                 # Textures and sound assets
-├── textures/
-└── sounds/
-screenshots/            # Game screenshots for documentation
+assets/                 # Game assets
+├── textures/           # Sprite images
+└── sounds/             # Audio files
+screenshots/            # Documentation images
 src/
-├── core/               # Game engine (Game, GameMap, Levels)
-├── entity/             # Game objects (Player, Deer)
-├── ui/                 # Menu, Buttons, Screens
-└── util/               # Configs, Colors, Math, Sound, Textures
+├── core/               # Core engine components
+│   ├── game.py         # Main game loop with state machine
+│   ├── game_map.py     # Level and terrain management
+│   ├── game_state.py   # Abstract state base classes
+│   └── state_machine.py # State transition manager
+├── entity/             # Game entities
+│   ├── game_object.py  # Base entity class
+│   ├── player.py       # Player character and controls
+│   └── deer.py         # Deer AI and behavior
+├── states/             # 🆕 State implementations
+│   ├── menu_state.py   # Main menu logic
+│   ├── playing_state.py # Core gameplay state
+│   └── paused_state.py # Pause menu state
+├── ui/                 # User interface components
+│   ├── button.py       # Interactive buttons
+│   ├── menu.py         # Menu system
+│   ├── high_score_screen.py # Score display
+│   └── name_input_dialog.py # Name entry
+└── util/               # Utilities and configuration
+    ├── color.py        # Color constants
+    ├── config.py       # Game configuration
+    ├── score_manager.py # High score management
+    ├── sound.py        # Audio management
+    └── texture.py      # Asset loading
 main.py                 # Entry point
-README.md               # This file
-level_scores.json       # Auto-saved high scores per level
+test_foundation.py      # 🆕 State machine testing
+level_scores.json       # Persistent high scores
 ```
 
-### Key Classes
+### 🆕 **New Architecture Benefits**
+- **Single Responsibility**: Each state handles only its specific functionality
+- **Clean Transitions**: Proper state lifecycle with enter/exit methods
+- **Networking Ready**: Single main loop can handle network events
+- **Extensible**: Easy to add new states (lobby, multiplayer, etc.)
+- **Testable**: Modular design allows for unit testing
+- **Maintainable**: Clear separation of concerns
 
-- **Game**: Main loop and state transitions
-- **Player**: Movement, direction, photo logic
-- **Deer**: AI, fleeing, wandering
-- **GameMap**: Obstacles and terrain
-- **Menu, Button**: UI components
-- **Sound, Texture**: Asset managers
+## Development Status
+
+### ✅ **Completed Features**
+- **Core Gameplay**: Full single-player experience with 20 levels
+- **State Machine Architecture**: Professional state management system
+- **High Score System**: Complete with player names, timestamps, and persistence
+- **UI System**: Comprehensive menu system with all screens
+- **Audio System**: Sound effects with toggle functionality
+- **Level System**: 20 predefined levels with increasing difficulty
+
+### 🚧 **In Progress**
+- **Specialized States**: Implementing remaining states (Game Over, Level Selection)
+- **State Integration**: Connecting new state machine with existing UI components
+
+### ⏳ **Planned Features**
+- **Networking Layer**: Client-server multiplayer implementation
+- **Lobby System**: Multiplayer game setup and management
+- **Advanced AI**: More sophisticated deer behaviors
+- **Performance Optimization**: Efficient rendering and game logic
 
 ## Development Timeline
 
-This 2D grid-based version represents the first phase of a three-part project:
+This project represents the first phase of a three-part assignment:
 
-1. **Python Implementation (Current)**: Simplified 2D grid-based version
-2. **Smalltalk Implementation (Upcoming)**: Port of the game to Smalltalk
-3. **Eiffel Implementation (Upcoming)**: Final version implemented in Eiffel
+### **Phase 1: Python Implementation** (Current)
+- ✅ **Foundation**: Core gameplay and architecture
+- ✅ **State Machine**: Professional state management
+- 🚧 **Polish**: Final UI integration and testing
+- ⏳ **Networking**: Multiplayer functionality
 
-Each implementation aims to explore the object-oriented features of the respective language.
+### **Phase 2: Smalltalk Implementation** (Upcoming)
+- Port core game logic to Smalltalk
+- Explore Smalltalk's unique OOP features
+- Adapt UI to Smalltalk's development environment
+
+### **Phase 3: Eiffel Implementation** (Upcoming)
+- Implement in Eiffel with design-by-contract
+- Utilize Eiffel's assertion and contract capabilities
+- Create terminal-based fallback if needed
+
+Each implementation explores different object-oriented programming paradigms and language-specific features.
 
 ## Assignment Context
 
-This game is developed as part of the "Advanced Object-Oriented Programming" course at TU Wien. The assignment involves creating three versions of the same game in different object-oriented languages:
+This game is developed as part of the "Advanced Object-Oriented Programming" course at TU Wien. The assignment demonstrates:
 
-1. A networked version in any OOP language (we chose Python with a simplified 2D approach)
-2. A simplified version in Smalltalk
-3. A version in Eiffel exploring its specific features
+1. **Networked OOP Application**: Python implementation with clean architecture
+2. **Language Comparison**: Exploring OOP features across three languages
+3. **Design Patterns**: Professional software architecture patterns
+4. **Software Engineering**: Version control, testing, and documentation
 
+The project showcases advanced OOP concepts including state machines, design patterns, and architectural principles that scale to real-world software development.
 
 ---
-
-*Note: This README describes the simplified 2D grid-based version of the Deer Picture Hunting Game. Future implementations in Smalltalk and Eiffel will build upon the concepts established here.*
