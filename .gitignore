@@ -186,3 +186,4 @@ cython_debug/
 *.blend1
 *.blend2
 *.backup
+/.python-version
