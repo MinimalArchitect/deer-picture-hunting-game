@@ -16,8 +16,10 @@ class GridType:
 class GameMap:
     """Represents the game environment"""
 
-    def __init__(self):
+    def __init__(self, level=None):
         self.grid = [[GridType.EMPTY for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
+        if level:
+            self.generate_predefined_map(level=level)
 
     def generate_random_map(self):
         """Generate a random map with trees, rocks, bushes"""

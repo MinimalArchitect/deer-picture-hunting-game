@@ -1,18 +1,26 @@
 import pygame
 
+from src.ui.gamefont import GameFont
 from src.util.color import Color
 
+class DefaultButtonConfig:
+    default_height = 50
+    default_width = 200
 
 class Button:
     """Interactive button for menu screens"""
 
-    def __init__(self, x, y, width, height, text, color, hover_color):
+    def __init__(self, text, x, y, width=DefaultButtonConfig.default_width, height=DefaultButtonConfig.default_height, color=Color.BUTTON, hover_color=Color.BUTTON_HOVER):
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.color = color
         self.hover_color = hover_color
         self.is_hovered = False
-        self.font = pygame.font.SysFont(None, 32)
+        self.font = GameFont.button_text_font
 
     def draw(self, surface, is_hovered=None):
         # Handle case where is_hovered is not provided
@@ -33,6 +41,12 @@ class Button:
         """Check if mouse is hovering over button"""
         return self.rect.collidepoint(mouse_pos)
 
-    def is_clicked(self, mouse_pos, mouse_click):
+    def is_clicked(self, mouse_pos):
         """Check if button is clicked"""
-        return self.rect.collidepoint(mouse_pos) and mouse_click
+        return self.rect.collidepoint(mouse_pos)
+
+    def width(self) -> int:
+        return self.width
+
+    def height(self) -> int:
+        return self.height
