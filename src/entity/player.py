@@ -1,6 +1,6 @@
 import math
-import random
 import time
+from enum import IntEnum, auto, StrEnum
 from typing import List
 
 import pygame
@@ -8,25 +8,67 @@ import pygame
 from src.core.game_map import GridType
 from src.entity.deer import Deer
 from src.entity.game_object import GameObject
-from src.util.texture import Texture
+from src.util.color import Color
 from src.util.config import GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+from src.util.texture import Texture
 
-class Direction:
+
+class Direction(IntEnum):
     """Player direction"""
-    UP = "UP"
-    DOWN = "DOWN"
-    LEFT = "LEFT"
-    RIGHT = "RIGHT"
+    UP = auto()
+    DOWN = auto()
+    LEFT = auto()
+    RIGHT = auto()
+
+class PlayerColor(StrEnum):
+    """Player color"""
+    RED = "RED"
+    GREEN = "GREEN"
+    BLUE = "BLUE"
+    YELLOW = "YELLOW"
+
 
 class Player(GameObject):
     """Player character"""
 
-    def __init__(self, x, y, clothes_color):
+    def __init__(self, x, y, clothes_color: PlayerColor = PlayerColor.GREEN):
         super().__init__(x, y)
         self.direction = Direction.UP
         self.photos_taken = 0
         self.spawn_time = time.time()  # Store the time when player is created
         self.clothes_color = clothes_color
+
+        self.texture_back = None
+        self.texture_front = None
+        self.texture_left = None
+        self.texture_right = None
+        self.color_fill = None
+
+        match clothes_color:
+            case PlayerColor.RED:
+                self.texture_back = Texture.hunter_red_back
+                self.texture_front = Texture.hunter_red_front
+                self.texture_right = Texture.hunter_red_right
+                self.texture_left = Texture.hunter_red_left
+                self.color_fill = Color.RED
+            case PlayerColor.BLUE:
+                self.texture_back = Texture.hunter_blue_back
+                self.texture_front = Texture.hunter_blue_front
+                self.texture_right = Texture.hunter_blue_right
+                self.texture_left = Texture.hunter_blue_left
+                self.color_fill = Color.BLUE
+            case PlayerColor.GREEN:
+                self.texture_back = Texture.hunter_green_back
+                self.texture_front = Texture.hunter_green_front
+                self.texture_right = Texture.hunter_green_right
+                self.texture_left = Texture.hunter_green_left
+                self.color_fill = Color.LIGHT_GREEN
+            case PlayerColor.YELLOW:
+                self.texture_back = Texture.hunter_yellow_back
+                self.texture_front = Texture.hunter_yellow_front
+                self.texture_right = Texture.hunter_yellow_right
+                self.texture_left = Texture.hunter_yellow_left
+                self.color_fill = Color.YELLOW
 
     def draw(self, surface):
         # Draw player pointing in direction
@@ -34,19 +76,19 @@ class Player(GameObject):
 
         match self.direction:
             case Direction.UP:
-                surface.blit(Texture.green_hunter_back, pos)
+                surface.blit(self.texture_back, pos)
             case Direction.DOWN:
-                surface.blit(Texture.green_hunter_front, pos)
+                surface.blit(self.texture_front, pos)
             case Direction.LEFT:
-                surface.blit(Texture.green_hunter_left, pos)
+                surface.blit(self.texture_left, pos)
             case Direction.RIGHT:
-                surface.blit(Texture.green_hunter_right, pos)
+                surface.blit(self.texture_right, pos)
 
         # Highlight the player with pulsing color of the hunter's clothes glow for 3 seconds
         if time.time() - self.spawn_time < 3:
             pulse_alpha = int(100 + 50 * math.sin((time.time() - self.spawn_time) * 6))
             highlight = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-            highlight.fill((*self.clothes_color, pulse_alpha))
+            highlight.fill((*self.color_fill, pulse_alpha))
             surface.blit(highlight, pos)
 
     def move(self, dx, dy, game_map, deer_list: List[Deer]):
@@ -77,6 +119,7 @@ class Player(GameObject):
         x, y = self.x, self.y
 
         # Direction vectors
+        dx, dy = 0, 0
         match self.direction:
             case Direction.UP:
                 dx, dy = 0, -1

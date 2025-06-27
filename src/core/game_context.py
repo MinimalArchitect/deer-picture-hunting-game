@@ -2,32 +2,27 @@ import json
 import os
 import random
 import time
+from typing import Tuple
 
 import pygame
 from pygame.time import Clock
 
 from src.core.game_map import GameMap, GridType
 from src.entity.deer import Deer
-from src.entity.player import Player
-from src.util.color import Color
+from src.entity.player import Player, PlayerColor
+from src.networking.listener import GameServer, GameClient
 from src.util.config import GRID_WIDTH, GRID_HEIGHT
-from src.util.score_manager import ScoreManager
+
+
+def _clamp(minimum, value, maximum):
+    return max(minimum, min(value, maximum))
 
 
 class PlayingContext:
-    def __init__(self, level: int):
-        """Set up the game objects when starting a new game"""
-        # Playing GameState
+
+    def __init__(self, level: int, map: GameMap):
         self.level = level
-        self.map = GameMap(level=self.level)
-
-        # Place the player in an empty cell
-        self.player = self._place_hunter_in_empty_cell(Color.LIGHT_GREEN)
-
-        # Create deer
-        self.deer = []
-        for _ in range(10):  # 10 deer
-            self.deer.append(self._place_in_empty_cell(Deer))
+        self.map = map
 
         # Game state
         self.score = 0
@@ -43,7 +38,7 @@ class PlayingContext:
             if self.map.get_cell(x, y) == GridType.EMPTY:
                 return object_class(x, y)
 
-    def _place_hunter_in_empty_cell(self, clothes_color):
+    def _place_hunter_in_empty_cell(self, clothes_color: PlayerColor):
         """Place a new object in a random empty cell"""
         while True:
             x = random.randint(0, GRID_WIDTH - 1)
@@ -51,6 +46,42 @@ class PlayingContext:
 
             if self.map.get_cell(x, y) == GridType.EMPTY:
                 return Player(x, y, clothes_color)
+
+
+class MultiPlayerContext(PlayingContext):
+    def __init__(self, difficulty: int):
+        """Set up the game objects when starting a new game"""
+        # Playing GameState
+        self.difficulty = difficulty
+        level = _clamp(0, self.difficulty + random.randint(-1, +1), 20)
+        super().__init__(level, GameMap(level=level))
+        self.server: GameServer | None = None
+        self.client: GameClient | None = None
+
+        self.server_host: Tuple[str, int] | None = None
+
+        # Place the player in an empty cell
+        self.players = [self._place_hunter_in_empty_cell(PlayerColor.GREEN)]
+
+        # Create deer
+        self.deer = []
+        for _ in range(10):  # 10 deer
+            self.deer.append(self._place_in_empty_cell(Deer))
+
+
+class SinglePlayerContext(PlayingContext):
+    def __init__(self, level: int):
+        """Set up the game objects when starting a new game"""
+        # Playing GameState
+        super().__init__(level, GameMap(level=level))
+
+        # Place the player in an empty cell
+        self.player = self._place_hunter_in_empty_cell(PlayerColor.YELLOW)
+
+        # Create deer
+        self.deer = []
+        for _ in range(10):  # 10 deer
+            self.deer.append(self._place_in_empty_cell(Deer))
 
 
 class GameContext:
@@ -65,9 +96,7 @@ class GameContext:
         # Configuration
         self.is_sound_enabled = True
 
-        self.score_manager = ScoreManager()
-
-        self.playing_context: PlayingContext | None = None
+        self.playing_context: SinglePlayerContext | MultiPlayerContext | None = None
 
         # Game objects will be initialized when starting the game
         self.level_scores = {}  # {level_number: highest_score}

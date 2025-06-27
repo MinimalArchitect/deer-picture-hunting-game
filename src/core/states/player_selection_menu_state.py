@@ -2,15 +2,16 @@ from typing import List
 
 import pygame
 
-from src.core.game_context import GameContext
+from src.core.game_context import GameContext, MultiPlayerContext
 from src.core.game_state import BaseGameState, GameState
+from src.networking.listener import GameServer, GameClient
 from src.ui.button import Button, DefaultButtonConfig
 from src.ui.gamefont import GameFont
 from src.util.color import Color
 from src.util.config import WINDOW_WIDTH
 
 
-class ComingSoonMenuState(BaseGameState):
+class PlayerSelectionMenuState(BaseGameState):
 
     def __init__(self, game_context: GameContext):
         super().__init__(game_context)
@@ -19,15 +20,34 @@ class ComingSoonMenuState(BaseGameState):
         self.back_button = Button("Back", center_x, 400)
 
     def get_enum_value(self) -> GameState:
-        return GameState.MENU_COMING_SOON
+        return GameState.MENU_PLAYER_SELECTION
 
     def enter(self, old_state: GameState | None) -> None:
-        assert self.game_context.playing_context is None
+        assert self.game_context.playing_context is not None
+
+        playing_context: MultiPlayerContext = self.game_context.playing_context
+
+        try:
+            if old_state == GameState.MENU_MAIN:
+                self.game_context.playing_context.server = GameServer(playing_context.server_host)
+            elif old_state == GameState.MENU_SERVER_SELECTION:
+                self.game_context.playing_context.client = GameClient(playing_context.server_host)
+        except OSError:
+            self._transition_request = GameState.MENU_ERROR_ADDRESS_BIND
+            self.game_context.playing_context = None
 
     def exit(self) -> None:
-        assert self.game_context.playing_context is None
+        pass
 
     def update(self, dt: float) -> None:
+        playing_context: MultiPlayerContext = self.game_context.playing_context
+        if self.game_context.playing_context is None:
+            return
+
+        if playing_context.server is not None:
+            self.game_context.playing_context.server.Pump()
+        else:
+            self.game_context.playing_context.client.Pump()
         pass
 
     def render(self) -> None:
@@ -45,3 +65,4 @@ class ComingSoonMenuState(BaseGameState):
                 mouse_pos = pygame.mouse.get_pos()
                 if self.back_button.is_clicked(mouse_pos):
                     self._transition_request = GameState.MENU_MAIN
+                    self.game_context.playing_context = None

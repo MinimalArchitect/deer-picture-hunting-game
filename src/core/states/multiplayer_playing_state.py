@@ -5,7 +5,7 @@ import pygame
 from pygame import Surface
 
 from src.core.game_context import GameContext
-from src.core.game_state import GameState
+from src.core.game_state import BaseGameState, GameState
 from src.entity.player import Direction
 from src.ui.gamefont import GameFont
 from src.util.color import Color
@@ -13,13 +13,16 @@ from src.util.config import WINDOW_WIDTH
 from src.util.sound import Sound
 
 
-class PlayingState(GameState):
+class MultiplayerPlayingState(BaseGameState):
 
     def __init__(self, game_context: GameContext):
         super().__init__(game_context)
         self.previous_frame_rate = self.game_context.frame_rate
 
-    def enter(self) -> None:
+    def get_enum_value(self) -> GameState:
+        return GameState.MULTIPLAYER_PLAYING
+
+    def enter(self, old_state: GameState | None) -> None:
         self.game_context.frame_rate = 10
 
     def exit(self) -> None:
@@ -36,14 +39,14 @@ class PlayingState(GameState):
 
         playing_context.time_left -= elapsed
         if playing_context.time_left <= 0:
-            self._transition_request = GameState.GAME_OVER
+            self._transition_request = GameState.MENU_GAME_OVER
 
         # Update deer
         for deer in playing_context.deer:
             deer.update(playing_context.player, playing_context.map, playing_context.deer)
 
     def render(self) -> None:
-        PlayingState.draw_game(self.screen, self.game_context)
+        MultiplayerPlayingState.draw_game(self.screen, self.game_context)
 
     @staticmethod
     def draw_game(screen: Surface, game_context: GameContext) -> None:
@@ -55,7 +58,8 @@ class PlayingState(GameState):
         for deer in playing_context.deer:
             deer.draw(screen)
 
-        playing_context.player.draw(screen)
+        for player in playing_context.players:
+            player.player.draw(screen)
 
         # Draw UI
         score_text = GameFont.text_font.render(f"Score: {playing_context.score}", True, Color.BLACK)
@@ -64,7 +68,7 @@ class PlayingState(GameState):
         time_text = GameFont.text_font.render(f"Time: {int(playing_context.time_left)}s", True, Color.BLACK)
         screen.blit(time_text, (WINDOW_WIDTH - time_text.get_width() - 10, 10))
 
-    def handle_event(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
         playing_context = self.game_context.playing_context
 
         for event in events:
@@ -72,7 +76,7 @@ class PlayingState(GameState):
                 if event.key == pygame.K_SPACE:
                     self.take_photo()
                 elif event.key == pygame.K_ESCAPE:
-                    self._transition_request = GameState.PAUSED
+                    self._transition_request = GameState.MENU_PAUSE
 
         has_moved = False
 

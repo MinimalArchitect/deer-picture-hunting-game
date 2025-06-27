@@ -11,16 +11,20 @@ class Button:
     """Interactive button for menu screens"""
 
     def __init__(self, text, x, y, width=DefaultButtonConfig.default_width, height=DefaultButtonConfig.default_height, color=Color.BUTTON, hover_color=Color.BUTTON_HOVER):
-        self.width = width
-        self.height = height
-        self.x = x
-        self.y = y
+        self.width, self.height = width, height
+        self.x, self.y = x, y
         self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
+
+        self.font = GameFont.button_text_font
         self.color = color
         self.hover_color = hover_color
+        self.disabled_color = Color.GRAY
+
+        self.text = text
+
         self.is_hovered = False
-        self.font = GameFont.button_text_font
+        self.is_disabled = False
+
 
     def draw(self, surface, is_hovered=None):
         # Handle case where is_hovered is not provided
@@ -29,6 +33,7 @@ class Button:
             
         # Draw button with appropriate color based on hover state
         color = self.hover_color if is_hovered else self.color
+        color = self.disabled_color if self.is_disabled else color
         pygame.draw.rect(surface, color, self.rect)
         pygame.draw.rect(surface, Color.BLACK, self.rect, 2)  # Border
 
@@ -50,3 +55,9 @@ class Button:
 
     def height(self) -> int:
         return self.height
+
+    def disable(self):
+        self.is_disabled = True
+
+    def enable(self):
+        self.is_disabled = False

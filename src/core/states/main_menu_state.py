@@ -2,15 +2,15 @@ from typing import List
 
 import pygame
 
-from src.core.game_context import GameContext
-from src.core.game_state import GameState
+from src.core.game_context import GameContext, MultiPlayerContext
+from src.core.game_state import BaseGameState, GameState
 from src.ui.button import Button, DefaultButtonConfig
 from src.ui.gamefont import GameFont
 from src.util.color import Color
 from src.util.config import WINDOW_WIDTH
 
 
-class MainMenuState(GameState):
+class MainMenuState(BaseGameState):
 
     def __init__(self, game_context: GameContext):
         super().__init__(game_context)
@@ -26,11 +26,14 @@ class MainMenuState(GameState):
             Button("Exit", button_x, 500)
         ]
 
-    def enter(self) -> None:
+    def get_enum_value(self) -> GameState:
+        return GameState.MENU_MAIN
+
+    def enter(self, old_state: GameState | None) -> None:
         assert self.game_context.playing_context is None
 
     def exit(self) -> None:
-        assert self.game_context.playing_context is None
+        pass
 
     def update(self, dt: float) -> None:
         pass
@@ -50,21 +53,23 @@ class MainMenuState(GameState):
         for button in self.main_buttons:
             button.draw(self.screen, button.check_hover(pygame.mouse.get_pos()))
 
-    def handle_event(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 for i, button in enumerate(self.main_buttons):
                     if button.is_clicked(mouse_pos):
                         if i == 0:  # Single Player
-                            self._transition_request = GameState.LEVEL_SELECTION_MENU
+                            self._transition_request = GameState.MENU_LEVEL_SELECTION
                         elif i == 1:  # Host Game
-                            self._transition_request = GameState.COMING_SOON
+                            self.game_context.playing_context = MultiPlayerContext(difficulty=0)
+                            self.game_context.playing_context.server_host = ("0.0.0.0", 12345)
+                            self._transition_request = GameState.MENU_PLAYER_SELECTION
                         elif i == 2:  # Join Game
-                            self._transition_request = GameState.COMING_SOON
+                            self._transition_request = GameState.MENU_SERVER_SELECTION
                         elif i == 3:  # Options
-                            self._transition_request = GameState.OPTIONS_MENU
+                            self._transition_request = GameState.MENU_OPTIONS
                         elif i == 4:  # High Scores
-                            self._transition_request = GameState.HIGH_SCORE_MENU
+                            self._transition_request = GameState.MENU_HIGH_SCORE
                         elif i == 5:  # Exit
                             self.game_context.is_running = False

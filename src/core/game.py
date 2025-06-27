@@ -8,6 +8,12 @@ from src.util.sound import Sound
 from src.util.texture import Texture
 
 
+# TODO: multiple deer difficulties
+# TODO: multiplayer game state
+# TODO: multiplayer game server
+# TODO: overhaul finished game state
+# TODO: introduce server selection
+# TODO: introduce player color selection
 class Game:
     """Main game class"""
 

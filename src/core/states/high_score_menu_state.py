@@ -1,18 +1,16 @@
-import json
-import os
 from typing import List
 
 import pygame
 
 from src.core.game_context import GameContext
-from src.core.game_state import GameState
+from src.core.game_state import BaseGameState, GameState
 from src.ui.button import Button
 from src.ui.gamefont import GameFont
 from src.util.color import Color
 from src.util.config import WINDOW_WIDTH
 
 
-class HighScoreMenuState(GameState):
+class HighScoreMenuState(BaseGameState):
 
     def __init__(self, game_context: GameContext):
         super().__init__(game_context)
@@ -22,7 +20,10 @@ class HighScoreMenuState(GameState):
         self.back_button = Button("Back", WINDOW_WIDTH // 2 - 140, 500, 120, 40)
         self.reset_button = Button("Reset", WINDOW_WIDTH // 2 + 20, 500, 120, 40)
 
-    def enter(self) -> None:
+    def get_enum_value(self) -> GameState:
+        return GameState.MENU_HIGH_SCORE
+
+    def enter(self, old_state: GameState | None) -> None:
         assert self.game_context.playing_context is None
 
     def exit(self) -> None:
@@ -56,11 +57,11 @@ class HighScoreMenuState(GameState):
         for button in [self.back_button, self.reset_button]:
             button.draw(self.screen, button.check_hover(pygame.mouse.get_pos()))
 
-    def handle_event(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.back_button.is_clicked(mouse_pos):
-                    self._transition_request = GameState.MAIN_MENU
+                    self._transition_request = GameState.MENU_MAIN
                 elif self.reset_button.is_clicked(mouse_pos):
                     self.game_context.remove_scores()
