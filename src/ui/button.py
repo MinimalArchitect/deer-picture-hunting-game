@@ -8,8 +8,6 @@ class DefaultButtonConfig:
     default_width = 200
 
 class Button:
-    """Interactive button for menu screens"""
-
     def __init__(self, text, x, y, width=DefaultButtonConfig.default_width, height=DefaultButtonConfig.default_height, color=Color.BUTTON, hover_color=Color.BUTTON_HOVER):
         self.width, self.height = width, height
         self.x, self.y = x, y

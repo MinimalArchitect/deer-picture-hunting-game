@@ -1,7 +1,14 @@
 import pygame
+from pygame import Surface
 
+from src.core.enum import PlayerColor
 from src.util.config import GRID_SIZE
 
+class TextureHunter:
+    back: Surface | None = None
+    front: Surface | None = None
+    right: Surface | None = None
+    left: Surface | None = None
 
 class Texture:
     GRASS_PATH = "assets/textures/grass.png"
@@ -31,32 +38,14 @@ class Texture:
     HUNTER_YELLOW_LEFT_PATH = "assets/textures/hunter-yellow-left.png"
     HUNTER_YELLOW_RIGHT_PATH = "assets/textures/hunter-yellow-right.png"
 
-    grass = None
-    rock = None
-    tree = None
-    bush = None
+    grass: Surface | None = None
+    rock: Surface | None = None
+    tree: Surface | None = None
+    bush: Surface | None = None
 
-    deer = None
+    deer: Surface | None = None
 
-    hunter_green_back = None
-    hunter_green_front = None
-    hunter_green_right = None
-    hunter_green_left = None
-
-    hunter_blue_back = None
-    hunter_blue_front = None
-    hunter_blue_right = None
-    hunter_blue_left = None
-
-    hunter_red_back = None
-    hunter_red_front = None
-    hunter_red_right = None
-    hunter_red_left = None
-
-    hunter_yellow_back = None
-    hunter_yellow_front = None
-    hunter_yellow_right = None
-    hunter_yellow_left = None
+    hunter: dict[PlayerColor, TextureHunter | None]
 
     @classmethod
     def _load(cls, path: str):
@@ -72,22 +61,22 @@ class Texture:
 
         cls.deer = cls._load(cls.DEER_PATH)
 
-        cls.hunter_green_back = cls._load(cls.HUNTER_GREEN_BACK_PATH)
-        cls.hunter_green_front = cls._load(cls.HUNTER_GREEN_FRONT_PATH)
-        cls.hunter_green_right = cls._load(cls.HUNTER_GREEN_RIGHT_PATH)
-        cls.hunter_green_left = cls._load(cls.HUNTER_GREEN_LEFT_PATH)
+        cls.hunter[PlayerColor.GREEN].back = cls._load(cls.HUNTER_GREEN_BACK_PATH)
+        cls.hunter[PlayerColor.GREEN].front = cls._load(cls.HUNTER_GREEN_FRONT_PATH)
+        cls.hunter[PlayerColor.GREEN].left = cls._load(cls.HUNTER_GREEN_LEFT_PATH)
+        cls.hunter[PlayerColor.GREEN].right = cls._load(cls.HUNTER_GREEN_RIGHT_PATH)
 
-        cls.hunter_blue_back = cls._load(cls.HUNTER_BLUE_BACK_PATH)
-        cls.hunter_blue_front = cls._load(cls.HUNTER_BLUE_FRONT_PATH)
-        cls.hunter_blue_right = cls._load(cls.HUNTER_BLUE_RIGHT_PATH)
-        cls.hunter_blue_left = cls._load(cls.HUNTER_BLUE_LEFT_PATH)
+        cls.hunter[PlayerColor.RED].back = cls._load(cls.HUNTER_RED_BACK_PATH)
+        cls.hunter[PlayerColor.RED].front = cls._load(cls.HUNTER_RED_FRONT_PATH)
+        cls.hunter[PlayerColor.RED].left = cls._load(cls.HUNTER_RED_LEFT_PATH)
+        cls.hunter[PlayerColor.RED].right = cls._load(cls.HUNTER_RED_RIGHT_PATH)
 
-        cls.hunter_red_back = cls._load(cls.HUNTER_RED_BACK_PATH)
-        cls.hunter_red_front = cls._load(cls.HUNTER_RED_FRONT_PATH)
-        cls.hunter_red_right = cls._load(cls.HUNTER_RED_RIGHT_PATH)
-        cls.hunter_red_left = cls._load(cls.HUNTER_RED_LEFT_PATH)
+        cls.hunter[PlayerColor.BLUE].back = cls._load(cls.HUNTER_BLUE_BACK_PATH)
+        cls.hunter[PlayerColor.BLUE].front = cls._load(cls.HUNTER_BLUE_FRONT_PATH)
+        cls.hunter[PlayerColor.BLUE].left = cls._load(cls.HUNTER_BLUE_LEFT_PATH)
+        cls.hunter[PlayerColor.BLUE].right = cls._load(cls.HUNTER_BLUE_RIGHT_PATH)
 
-        cls.hunter_yellow_back = cls._load(cls.HUNTER_YELLOW_BACK_PATH)
-        cls.hunter_yellow_front = cls._load(cls.HUNTER_YELLOW_FRONT_PATH)
-        cls.hunter_yellow_right = cls._load(cls.HUNTER_YELLOW_RIGHT_PATH)
-        cls.hunter_yellow_left = cls._load(cls.HUNTER_YELLOW_LEFT_PATH)
+        cls.hunter[PlayerColor.YELLOW].back = cls._load(cls.HUNTER_YELLOW_BACK_PATH)
+        cls.hunter[PlayerColor.YELLOW].front = cls._load(cls.HUNTER_YELLOW_FRONT_PATH)
+        cls.hunter[PlayerColor.YELLOW].left = cls._load(cls.HUNTER_YELLOW_LEFT_PATH)
+        cls.hunter[PlayerColor.YELLOW].right = cls._load(cls.HUNTER_YELLOW_RIGHT_PATH)

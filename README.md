@@ -120,7 +120,7 @@ This version uses a simplified grid-based approach to focus on the core game mec
 
 4. Run the game:
    ```bash
-   python main.py
+   python main_client.py
    ```
 
 ## How to Play
