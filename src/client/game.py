@@ -216,6 +216,9 @@ class Scores:
                     self.level_scores = json.load(f)
             except Exception as e:
                 print('Error loading scores:', e)
+        else:
+            self.reset_scores()
+            self.save_scores()
 
     def save_scores(self):
         try:
