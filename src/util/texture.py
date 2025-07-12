@@ -45,7 +45,7 @@ class Texture:
 
     deer: Surface | None = None
 
-    hunter: dict[PlayerColor, TextureHunter | None]
+    hunter: dict[PlayerColor, TextureHunter | None] = {}
 
     @classmethod
     def _load(cls, path: str):
@@ -61,21 +61,25 @@ class Texture:
 
         cls.deer = cls._load(cls.DEER_PATH)
 
+        cls.hunter[PlayerColor.GREEN] = TextureHunter()
         cls.hunter[PlayerColor.GREEN].back = cls._load(cls.HUNTER_GREEN_BACK_PATH)
         cls.hunter[PlayerColor.GREEN].front = cls._load(cls.HUNTER_GREEN_FRONT_PATH)
         cls.hunter[PlayerColor.GREEN].left = cls._load(cls.HUNTER_GREEN_LEFT_PATH)
         cls.hunter[PlayerColor.GREEN].right = cls._load(cls.HUNTER_GREEN_RIGHT_PATH)
 
+        cls.hunter[PlayerColor.RED] = TextureHunter()
         cls.hunter[PlayerColor.RED].back = cls._load(cls.HUNTER_RED_BACK_PATH)
         cls.hunter[PlayerColor.RED].front = cls._load(cls.HUNTER_RED_FRONT_PATH)
         cls.hunter[PlayerColor.RED].left = cls._load(cls.HUNTER_RED_LEFT_PATH)
         cls.hunter[PlayerColor.RED].right = cls._load(cls.HUNTER_RED_RIGHT_PATH)
 
+        cls.hunter[PlayerColor.BLUE] = TextureHunter()
         cls.hunter[PlayerColor.BLUE].back = cls._load(cls.HUNTER_BLUE_BACK_PATH)
         cls.hunter[PlayerColor.BLUE].front = cls._load(cls.HUNTER_BLUE_FRONT_PATH)
         cls.hunter[PlayerColor.BLUE].left = cls._load(cls.HUNTER_BLUE_LEFT_PATH)
         cls.hunter[PlayerColor.BLUE].right = cls._load(cls.HUNTER_BLUE_RIGHT_PATH)
 
+        cls.hunter[PlayerColor.YELLOW] = TextureHunter()
         cls.hunter[PlayerColor.YELLOW].back = cls._load(cls.HUNTER_YELLOW_BACK_PATH)
         cls.hunter[PlayerColor.YELLOW].front = cls._load(cls.HUNTER_YELLOW_FRONT_PATH)
         cls.hunter[PlayerColor.YELLOW].left = cls._load(cls.HUNTER_YELLOW_LEFT_PATH)
