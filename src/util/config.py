@@ -1,7 +1,0 @@
-
-# Constants
-GRID_SIZE = 30  # Size of each grid cell in pixels
-GRID_WIDTH = 40
-GRID_HEIGHT = 30
-WINDOW_WIDTH = GRID_WIDTH * GRID_SIZE
-WINDOW_HEIGHT = GRID_HEIGHT * GRID_SIZE

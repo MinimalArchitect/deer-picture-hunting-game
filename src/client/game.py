@@ -15,7 +15,6 @@ from src.core.type import Position
 from src.ui.button import DefaultButtonConfig, Button
 from src.ui.gamefont import GameFont
 from src.util.color import Color
-from src.util.config import WINDOW_WIDTH, WINDOW_HEIGHT
 from src.util.sound import Sound
 from src.util.texture import Texture
 
@@ -71,7 +70,6 @@ class GameClientContext(ConnectionListener):
         self.is_sound_enabled = is_sound_enabled
 
         self.Connect(server_host)
-        self.score: int = 0
 
     def pump(self):
         connection.Pump()
@@ -153,7 +151,7 @@ class GameContext:
         self.clock = pygame.time.Clock()
         self.frame_rate = 30
 
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pygame.display.set_mode((GameClientConfig.WINDOW_WIDTH, GameClientConfig.WINDOW_HEIGHT))
         pygame.display.set_caption('Deer Picture Hunting')
 
         self.is_sound_enabled = True
@@ -232,16 +230,16 @@ class Scores:
         assert GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
         return self.level_scores[str(level)]
 
-    def set(self, level: int, score: int) -> None:
+    def set_high_score(self, level: int, score: int) -> None:
         assert GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
-        self.level_scores[str(level)] = score
+        self.level_scores[str(level)] = max(score, self.level_scores[str(level)])
 
 
 class MainMenuState(GameState):
     def __init__(self):
         super().__init__()
 
-        self.center_x = WINDOW_WIDTH // 2
+        self.center_x = GameClientConfig.WINDOW_WIDTH // 2
         button_x = self.center_x - DefaultButtonConfig.default_width // 2
 
         self.join_game_button = Button('Join Game', button_x, 290)
@@ -298,7 +296,7 @@ class HighScoreMenuState(GameState):
         self.scores = Scores()
         self.scores.load_scores()
 
-        center_x = WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
+        center_x = GameClientConfig.WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
         self.back_button = Button('Back', center_x - DefaultButtonConfig.default_width // 2 - 10, 500)
         self.reset_button = Button('Reset', center_x + DefaultButtonConfig.default_width // 2 + 10, 500)
 
@@ -324,17 +322,17 @@ class HighScoreMenuState(GameState):
     def render(self, context: GameContext) -> None:
         # Draw title
         title_text = GameFont.heading1_font.render('High Scores', True, Color.BLACK)
-        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 60))
+        title_rect = title_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 60))
         context.screen.blit(title_text, title_rect)
 
         # Draw scores in two columns
-        column_x = [WINDOW_WIDTH // 2 - 180, WINDOW_WIDTH // 2 + 20]
+        column_x = [GameClientConfig.WINDOW_WIDTH // 2 - 180, GameClientConfig.WINDOW_WIDTH // 2 + 20]
         y_start = 140
         line_spacing = 30
 
         for i, level in enumerate(range(1, 21)):
-            col = 0 if level <= 10 else 1
-            row = i if level <= 10 else i - 10
+            col = 0 if level <= GameClientConfig.MAX_LEVEL // 2 else 1
+            row = i if level <= GameClientConfig.MAX_LEVEL // 2 else i - GameClientConfig.MAX_LEVEL // 2
             y = y_start + row * line_spacing
             score = self.scores.get(level)
             text = f'Level {level}: {score if score is not None else '-'}'
@@ -348,7 +346,7 @@ class HighScoreMenuState(GameState):
 class OptionsMenuState(GameState):
     def __init__(self):
         super().__init__()
-        center_x = WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
+        center_x = GameClientConfig.WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
 
         self.back_button = Button('Back', center_x, 400)
         self.sound_toggle_button = Button('Sound: On', center_x, 250)
@@ -373,7 +371,7 @@ class OptionsMenuState(GameState):
 
     def render(self, context: GameContext) -> None:
         title_text = GameFont.heading1_font.render('Options', True, Color.BLACK)
-        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 60))
+        title_rect = title_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 60))
         context.screen.blit(title_text, title_rect)
 
         self.sound_toggle_button.text = f'Sound: {'On' if context.is_sound_enabled else 'Off'}'
@@ -385,13 +383,13 @@ class OptionsMenuState(GameState):
 class ServerSelectionMenuState(GameState):
     def __init__(self):
         super().__init__()
-        center_x = WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
+        center_x = GameClientConfig.WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
 
         self.server_host: str = ''
 
         # Rectangle position and size
         self.rect_width, self.rect_height = 220, 50
-        self.rect_x, self.rect_y = WINDOW_WIDTH // 2 - self.rect_width // 2, 250
+        self.rect_x, self.rect_y = GameClientConfig.WINDOW_WIDTH // 2 - self.rect_width // 2, 250
         self.border_thickness = 4
 
         self.back_button = Button('Back', center_x - DefaultButtonConfig.default_width // 2 - 10, 400)
@@ -451,7 +449,7 @@ class ServerSelectionMenuState(GameState):
 
         ## Render input text
         text = GameFont.text_font.render(self.server_host, True, Color.BLACK)
-        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 275))
+        text_rect = text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 275))
         context.screen.blit(text, text_rect)
 
         for button in [self.join_button, self.back_button]:
@@ -465,11 +463,11 @@ class LevelSelectionMenuState(GameState):
         spacing = 10
         button_width = 100
         button_height = 40
-        start_x = WINDOW_WIDTH // 2 - ((columns * button_width) + (columns - 1) * spacing) // 2
+        start_x = GameClientConfig.WINDOW_WIDTH // 2 - ((columns * button_width) + (columns - 1) * spacing) // 2
         start_y = 180
         total_levels = 20
 
-        button_center_x = WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
+        button_center_x = GameClientConfig.WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
         self.back_button = Button(
             "Back",
             button_center_x,
@@ -520,7 +518,7 @@ class LevelSelectionMenuState(GameState):
 
     def render(self, context: GameContext) -> None:
         title_text = GameFont.heading1_font.render("Choose Level", True, Color.BLACK)
-        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 60))
+        title_rect = title_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 60))
         context.screen.blit(title_text, title_rect)
 
         for button in self.level_buttons + [self.back_button]:
@@ -585,22 +583,22 @@ class PlayingState(GameState):
         [deer.draw(context.screen) for deer in context.client_context.deer]
 
         # Draw UI
-        score_text = GameFont.text_font.render(f'Score: {context.client_context.score}', True, Color.BLACK)
+        score_text = GameFont.text_font.render(f'High Score: {context.client_context.score}', True, Color.BLACK)
         context.screen.blit(score_text, (10, 10))
 
         time_text = GameFont.text_font.render(f'Time: {int(context.client_context.time_left)}s', True, Color.BLACK)
-        context.screen.blit(time_text, (WINDOW_WIDTH - time_text.get_width() - 10, 10))
+        context.screen.blit(time_text, (GameClientConfig.WINDOW_WIDTH - time_text.get_width() - 10, 10))
 
 
 class GameOverState(GameState):
     def __init__(self):
         super().__init__()
-        self.center_y = WINDOW_HEIGHT // 2
+        self.center_y = GameClientConfig.WINDOW_HEIGHT // 2
         self.scores = Scores()
         self.scores.load_scores()
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
-        self.scores.set(context.client_context.level, context.client_context.score)
+        self.scores.set_high_score(context.client_context.level, context.client_context.score)
         self.scores.save_scores()
         assert context.client_context is not None
 
@@ -617,20 +615,20 @@ class GameOverState(GameState):
 
     def render(self, context: GameContext) -> None:
         game_over_text = GameFont.heading1_font.render('GAME OVER', True, Color.BLACK)
-        game_over_text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50))
+        game_over_text_rect = game_over_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, GameClientConfig.WINDOW_HEIGHT // 2 - 50))
         context.screen.blit(game_over_text, game_over_text_rect)
 
         if context.client_context.score == -1:
             final_score_text = GameFont.heading1_font.render(f'You have photographed another player. You lose!', True, Color.BLACK)
-            final_score_text_rect = final_score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20))
+            final_score_text_rect = final_score_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, GameClientConfig.WINDOW_HEIGHT // 2 + 20))
             context.screen.blit(final_score_text, final_score_text_rect)
         else:
             final_score_text = GameFont.heading1_font.render(f'Final Score: {context.client_context.score}', True, Color.BLACK)
-            final_score_text_rect = final_score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20))
+            final_score_text_rect = final_score_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, GameClientConfig.WINDOW_HEIGHT // 2 + 20))
             context.screen.blit(final_score_text, final_score_text_rect)
 
         instruction_text = GameFont.text_font.render('Press any key to continue', True, Color.BLACK)
-        instruction_text_rect = final_score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80))
+        instruction_text_rect = final_score_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, GameClientConfig.WINDOW_HEIGHT // 2 + 80))
         context.screen.blit(instruction_text, instruction_text_rect)
 
 

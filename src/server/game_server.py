@@ -191,9 +191,6 @@ class Deer(GameObject, ABC):
         ]
         random.shuffle(possible_moves)
 
-        deer_list = context.deer.copy()
-        deer_list.remove(self)
-
         self.move_with_possible_directions(possible_moves, context)
 
     def flee_from(self, nearest_player_position: Position, context: 'GameServerContext') -> None:
@@ -334,7 +331,7 @@ class GameServerContext:
     def __init__(self) -> None:
         self._clock = pygame.time.Clock()
 
-        self.level = 10
+        self.level = GameServerConfig.MIN_LEVEL
         self._map = GameMap(level=self.level)
 
         self._players: WeakKeyDictionary[Player, bool] = WeakKeyDictionary()

@@ -1,8 +1,8 @@
 import pygame
 from pygame import Surface
 
+from src.core.config import GameClientConfig
 from src.core.enum import PlayerColor
-from src.util.config import GRID_SIZE
 
 class TextureHunter:
     back: Surface | None = None
@@ -50,7 +50,7 @@ class Texture:
     @classmethod
     def _load(cls, path: str):
         image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(image, (GRID_SIZE, GRID_SIZE))
+        return pygame.transform.scale(image, (GameClientConfig.TILE_SIZE, GameClientConfig.TILE_SIZE))
 
     @classmethod
     def load_all(cls):
