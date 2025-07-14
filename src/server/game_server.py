@@ -19,6 +19,13 @@ from src.server.game_map import GameMap
 
 class GameObject(ABC):
     def __init__(self, position: Position) -> None:
+        """
+        Precondition:
+            - position is a valid Position instance
+
+        Postcondition:
+            - Initializes position and sets default direction to UP
+        """
         self._position = position
         self._direction = MoveDirection.UP
 
@@ -32,19 +39,38 @@ class GameObject(ABC):
 
     @property
     def position(self) -> Position:
+        """
+        Postcondition:
+            - Returns the current position
+        """
         return self._position
 
     @position.setter
     def position(self, value: Position) -> None:
+        """
+        Precondition:
+            - value is a valid Position instance
+
+        Postcondition:
+            - Updates the position
+        """
         self._position = value
 
     @property
     def direction(self) -> MoveDirection:
+        """
+        Postcondition:
+            - Returns the current movement direction
+        """
         return self._direction
 
 
 class Player(Channel, GameObject):
     def __init__(self, *args, **kwargs) -> None:
+        """
+        Postcondition:
+            - Initializes player with a unique ID and default state
+        """
         self.player_id = uuid.uuid4()
         Channel.__init__(self, *args, **kwargs)
         GameObject.__init__(self, Position(0, 0))
@@ -52,25 +78,53 @@ class Player(Channel, GameObject):
         self.has_photographed_player = False
 
     def set_position(self, position: Position) -> None:
+        """
+        Postcondition:
+            - Sets the player's position to the given value
+        """
         self._position = position
 
     def Close(self) -> None:
+        """
+        Postcondition:
+            - Removes player from server
+        """
         self._server.remove_player(self)
 
     def Network_move(self, data) -> None:
-        print(data)
+        """
+        Precondition:
+            - data contains 'move_direction'
+
+        Postcondition:
+            - Appends a movement event to the server context
+        """
         move_direction: MoveDirection = MoveDirection(data['move_direction'].upper())
         self._server.context.events.append(ClientEvent(self.player_id, move_direction, False))
 
     def Network_take_picture(self, data) -> None:
+        """
+        Postcondition:
+            - Appends a picture event to the server context
+        """
         self._server.context.events.append(ClientEvent(self.player_id, None, True))
 
     def Network_select_level(self, data) -> None:
-        # Are we allowed to change a level?
+        """
+        Precondition:
+            - data contains 'level', and server allows level reset
+
+        Postcondition:
+            - Starts the game with the selected level
+        """
         if self._server.is_level_reset_allowed():
             self._server.start_game(data['level'])
 
     def handle_events(self, events: list[ClientEvent], context: 'GameServerContext') -> None:
+        """
+        Postcondition:
+            - Handles movement or picture taking for this player based on queued events
+        """
         for event in events:
             if event.player_id != self.player_id:
                 continue
@@ -93,9 +147,20 @@ class Player(Channel, GameObject):
                     self.move(Direction(+1, 0), MoveDirection.RIGHT, context)
 
     def update(self, dt: int, context: 'GameServerContext') -> None:
+        """
+        Postcondition:
+            - Placeholder for per-frame logic (not used here)
+        """
         pass
 
     def move(self, direction: Direction, move_direction: MoveDirection, context: 'GameServerContext') -> None:
+        """
+        Precondition:
+            - direction and move_direction are valid
+
+        Postcondition:
+            - Updates position if new position is walkable and unoccupied
+        """
         new_position = self.position + direction
         self._direction = move_direction
 
@@ -111,6 +176,10 @@ class Player(Channel, GameObject):
             self.Send({'action': 'moved'})
 
     def take_picture(self, context: 'GameServerContext') -> None:
+        """
+        Postcondition:
+            - Updates deer_photographed or sets has_photographed_player if any target in line of sight
+        """
         picture_direction = Direction(0, 0)
         match self._direction:
             case MoveDirection.UP:
@@ -142,12 +211,22 @@ class Player(Channel, GameObject):
                     self.deer_photographed.add(deer)
 
     def reset(self):
+        """
+        Postcondition:
+            - Clears all previously photographed targets
+        """
         self.deer_photographed = set()
         self.has_photographed_player = False
 
 
 class Deer(GameObject, ABC):
     def __init__(self, position: Position, smell_distance: int, visual_distance: int, alert_threshold: int) -> None:
+        """
+        Precondition:
+            - smell_distance, visual_distance, alert_threshold >= 0
+        Postcondition:
+            - Initializes alert values and distances
+        """
         super().__init__(position)
         self.alert_level = 0
         self.smell_distance = smell_distance
@@ -158,6 +237,11 @@ class Deer(GameObject, ABC):
         pass
 
     def update(self, dt: int, context: 'GameServerContext') -> None:
+        """
+        Postcondition:
+            - Updates alert level based on player distance or sight
+            - Moves the deer by fleeing or randomly
+        """
         nearest_player = self._get_nearest_player(context)
         player_in_direct_sight = self._get_any_player_in_direct_sight(context)
 
@@ -180,6 +264,10 @@ class Deer(GameObject, ABC):
             self.flee_from(nearest_player.position, context)
 
     def random_walk(self, context: 'GameServerContext') -> None:
+        """
+        Postcondition:
+            - Deer may move in a random direction (25% chance)
+        """
         if random.random() >= 0.25:
             return
 
@@ -194,6 +282,12 @@ class Deer(GameObject, ABC):
         self.move_with_possible_directions(possible_moves, context)
 
     def flee_from(self, nearest_player_position: Position, context: 'GameServerContext') -> None:
+        """
+        Precondition:
+            - nearest_player_position is a valid Position
+        Postcondition:
+            - Deer attempts to move away from nearest player
+        """
         def sign(value: int) -> int:
             if value < 0:
                 return -1
@@ -215,6 +309,10 @@ class Deer(GameObject, ABC):
         self.move_with_possible_directions(possible_moves, context)
 
     def move_with_possible_directions(self, possible_moves, context):
+        """
+        Postcondition:
+            - Deer moves to first valid position from shuffled directions
+        """
         # Try each move until we find a valid one
         for move in possible_moves:
             new_position = self.position + move
@@ -231,6 +329,10 @@ class Deer(GameObject, ABC):
                 break
 
     def _get_any_player_in_direct_sight(self, context: 'GameServerContext') -> Player | None:
+        """
+        Postcondition:
+            - Returns a player if one is in a straight unobstructed line of sight
+        """
         direction = Direction(0, 0)
         match self._direction:
             case MoveDirection.UP:
@@ -259,6 +361,10 @@ class Deer(GameObject, ABC):
         return None
 
     def _get_nearest_player(self, context: 'GameServerContext') -> Player | None:
+        """
+        Postcondition:
+            - Returns the closest player based on distance metric
+        """
         nearest_player: Player | None = None
         for player in context.players:
             if nearest_player is None:
@@ -274,6 +380,10 @@ class Deer(GameObject, ABC):
 
 class BlindDeer(Deer):
     def __init__(self, position: Position) -> None:
+        """
+        Postcondition:
+            - Initializes a deer with limited perception (blind)
+        """
         super().__init__(position, 5, 7, 40)
 
     @property
@@ -291,6 +401,10 @@ class BlindDeer(Deer):
 
 class MediumDeer(Deer):
     def __init__(self, position: Position) -> None:
+        """
+        Postcondition:
+            - Initializes a deer with moderate sensitivity
+        """
         super().__init__(position, 6, 8, 40)
 
     @property
@@ -308,6 +422,10 @@ class MediumDeer(Deer):
 
 class SuperDeer(Deer):
     def __init__(self, position: Position) -> None:
+        """
+        Postcondition:
+            - Initializes a highly alert and reactive deer
+        """
         super().__init__(position, 6, 8, 30)
 
     @property
@@ -324,11 +442,19 @@ class SuperDeer(Deer):
 
 
 def clamp(n: int, lower: int, upper: int) -> int:
+    """
+    Postcondition:
+        - Returns n clamped between lower and upper bounds
+    """
     return max(lower, min(n, upper))
 
 
 class GameServerContext:
     def __init__(self) -> None:
+        """
+        Postcondition:
+            - Initializes game state, players, deer, clock, and map for the current level.
+        """
         self._clock = pygame.time.Clock()
 
         self.level = GameServerConfig.MIN_LEVEL
@@ -341,6 +467,12 @@ class GameServerContext:
         self._game_start_time = time.time()
 
     def _generate_deer_wave(self, level: int) -> list[Deer]:
+        """
+        Precondition:
+            - GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
+        Postcondition:
+            - Returns a list of deer (Blind, Medium, Super) depending on level
+        """
         assert GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
         total_deer = GameServerConfig.DEER_COUNT
 
@@ -397,6 +529,12 @@ class GameServerContext:
         return False
 
     def reset(self, level: int):
+        """
+        Precondition:
+            - GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
+        Postcondition:
+            - Context is reset with new map, deer, and player states for the given level.
+        """
         assert GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
         self.level = level
         self._map = GameMap(level=self.level)
@@ -426,6 +564,10 @@ class GameServer(Server):
     channelClass = Player
 
     def __init__(self, config: GameServerConfig) -> None:
+        """
+        Postcondition:
+            - Server initialized and ready in LEVEL_SELECTION state.
+        """
         super().__init__(localaddr=config.host)
         pygame.init()
         self.config: GameServerConfig = config
@@ -435,6 +577,10 @@ class GameServer(Server):
         self.state = GameServerState.LEVEL_SELECTION
 
     def Connected(self, player: Player, address: Any) -> None:
+        """
+        Postcondition:
+            - Adds player to game if server is in level selection phase.
+        """
         if self.state != GameServerState.LEVEL_SELECTION:
             player.Close()
         position = self.context.map.get_empty_tile()
@@ -442,24 +588,46 @@ class GameServer(Server):
         self.add_player(player)
 
     def add_player(self, player) -> None:
+        """
+        Postcondition:
+            - Registers player in the context
+        """
         print(f'New Player {str(player.addr)}')
         self.context.players[player] = True
         print(f'players: {[player for player in self.context.players]}')
 
     def remove_player(self, player: Player) -> None:
+        """
+        Postcondition:
+            - Removes player from context
+        """
         print(f'Removing Player {str(player.addr)}')
         del self.context.players[player]
 
     def send_to_all(self, data: dict[str, Any]) -> None:
+        """
+        Postcondition:
+            - Broadcasts data to all connected players
+        """
         [player.Send(data) for player in self.context.players]
 
     def send_score(self):
+        """
+        Postcondition:
+            - Sends score to all players
+        """
         [player.Send({'action': 'score', 'score': len(player.deer_photographed) if not player.has_photographed_player else -1}) for player in self.context.players]
 
     def is_level_reset_allowed(self) -> bool:
         return self.state == GameServerState.LEVEL_SELECTION
 
     def start_game(self, level: int) -> None:
+        """
+        Precondition:
+            - GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
+        Postcondition:
+            - Starts game and transitions to PLAYING state
+        """
         assert GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
         self.context.reset(level)
         self.state = GameServerState.PLAYING
@@ -470,6 +638,10 @@ class GameServer(Server):
         })
 
     def update(self, dt: int) -> None:
+        """
+        Postcondition:
+            - Processes events, updates all objects, and sends game state to clients
+        """
         ClientEvent.remove_duplicate_client_events(self.context.events)
 
         [player.handle_events(self.context.events, self.context) for player in self.context.players]
@@ -490,6 +662,10 @@ class GameServer(Server):
         })
 
     def run(self) -> None:
+        """
+        Postcondition:
+            - Runs the server main loop and updates state based on time and progression.
+        """
         while True:
             if self.state == GameServerState.LEVEL_SELECTION:
                 self.Pump()

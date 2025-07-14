@@ -8,6 +8,13 @@ from src.util.predefined_levels import LEVELS
 
 class GameMap:
     def __init__(self, level: int) -> None:
+        """
+        Precondition:
+            - GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
+
+        Postcondition:
+            - Initializes map grid with tiles from predefined LEVELS
+        """
         assert GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
         self._level = level
         self._grid: list[list[Tile]] = []
@@ -15,6 +22,13 @@ class GameMap:
         self.load_map_from_file(self._level)
 
     def load_map_from_file(self, level: int) -> None:
+        """
+        Precondition:
+            - GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
+
+        Postcondition:
+            - self._grid is filled with tiles according to LEVELS[level]
+        """
         assert GameServerConfig.MIN_LEVEL <= level <= GameServerConfig.MAX_LEVEL
         layout = LEVELS.get(level, LEVELS[max(LEVELS.keys())])
         for y, row in enumerate(layout):
@@ -33,13 +47,29 @@ class GameMap:
                         assert False, "unreachable"
 
     def _clear(self) -> None:
+        """
+        Postcondition:
+            - Initializes self._grid to a 2D grid filled with Tile.EMPTY
+        """
         self._grid = [[Tile.EMPTY for _ in range(GameServerConfig.GRID_HEIGHT)] for _ in range(GameServerConfig.GRID_WIDTH)]
 
     def get_tile(self, position: Position) -> Tile:
+        """
+        Precondition:
+            - 0 <= position.x < GameServerConfig.GRID_WIDTH
+            - 0 <= position.y < GameServerConfig.GRID_HEIGHT
+
+        Postcondition:
+            - Returns the tile at the specified position
+        """
         assert 0 <= position.x < GameServerConfig.GRID_WIDTH and 0 <= position.y < GameServerConfig.GRID_HEIGHT
         return self._grid[position.x][position.y]
 
     def get_empty_tile(self) -> Position:
+        """
+        Postcondition:
+            - Returns a random position on the grid where the tile is Tile.EMPTY
+        """
         while True:
             position = Position(
                 random.randint(0, GameServerConfig.GRID_WIDTH - 1),

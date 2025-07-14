@@ -21,19 +21,46 @@ from src.util.texture import Texture
 
 class GameObject(ABC):
     def __init__(self, position: Position, direction: MoveDirection) -> None:
+        """
+        Precondition:
+            - position is a valid Position object
+            - direction is a valid MoveDirection
+
+        Postcondition:
+            - self._position and self._direction are initialized with given values
+        """
         self._position = position
         self._direction = direction
 
     @property
     def position(self) -> Position:
+        """
+        Postcondition:
+            - Returns the current position of the GameObject
+        """
         return self._position
 
 
 class Player(GameObject):
     def __init__(self, position: Position, direction: MoveDirection) -> None:
+        """
+        Precondition:
+            - position and direction must be valid
+
+        Postcondition:
+            - Player is correctly initialized via GameObject constructor
+        """
         super().__init__(position, direction)
 
     def draw(self, surface, color: PlayerColor) -> None:
+        """
+        Precondition:
+            - surface is a valid Pygame surface
+            - color is a valid PlayerColor
+
+        Postcondition:
+            - Draws the player sprite on the given surface based on direction
+        """
         pos = (self.position.x * GameClientConfig.TILE_SIZE, self.position.y * GameClientConfig.TILE_SIZE)
         if self._direction == MoveDirection.UP:
             surface.blit(Texture.hunter[color].back, pos)
@@ -47,15 +74,37 @@ class Player(GameObject):
 
 class Deer(GameObject):
     def __init__(self, position: Position, direction: MoveDirection) -> None:
+        """
+        Precondition:
+            - position and direction must be valid
+
+        Postcondition:
+            - Deer is correctly initialized via GameObject constructor
+        """
         super().__init__(position, direction)
 
     def draw(self, surface):
+        """
+        Precondition:
+            - surface is a valid Pygame surface
+
+        Postcondition:
+            - Draws the deer sprite on the given surface at current position
+        """
         pos = (self.position.x * GameClientConfig.TILE_SIZE, self.position.y * GameClientConfig.TILE_SIZE)
         surface.blit(Texture.deer, pos)
 
 
 class GameClientContext(ConnectionListener):
     def __init__(self, server_host: tuple[str, int], is_sound_enabled: bool):
+        """
+        Precondition:
+            - server_host is a tuple of (host, port)
+            - is_sound_enabled is a boolean
+
+        Postcondition:
+            - GameClientContext is initialized and attempts to connect to server
+        """
         self.map: GameMap | None = None
         self.players: list[Player] = []
         self.deer: list[Deer] = []
@@ -72,21 +121,43 @@ class GameClientContext(ConnectionListener):
         self.Connect(server_host)
 
     def pump(self):
+        """
+        Postcondition:
+            - Processes incoming and outgoing network messages
+        """
         connection.Pump()
         self.Pump()
 
     def send_move(self, move_direction: MoveDirection):
+        """
+        Precondition:
+            - move_direction is a valid MoveDirection
+
+        Postcondition:
+            - Sends a move action to the server
+        """
         self.Send({
             'action': 'move',
             'move_direction': move_direction.name,
         })
 
     def send_take_picture(self):
+        """
+        Postcondition:
+            - Sends a take_picture action to the server
+        """
         self.Send({
             'action': 'take_picture'
         })
 
     def send_select_level(self, level: int):
+        """
+        Precondition:
+            - level is within GameClientConfig.MIN_LEVEL and MAX_LEVEL
+
+        Postcondition:
+            - Sends a select_level request to the server
+        """
         assert GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
         connection.Send({
             'action': 'select_level',
@@ -94,10 +165,24 @@ class GameClientContext(ConnectionListener):
         })
 
     def Network_game_started(self, data):
+        """
+        Precondition:
+            - data contains a valid level
+
+        Postcondition:
+            - Initializes game map and level
+        """
         self.map = GameMap(level=data['level'])
         self.level = data['level']
 
     def Network_state_update(self, data):
+        """
+        Precondition:
+            - data['message'] contains valid player and deer states
+
+        Postcondition:
+            - Updates the game state with new player, deer positions and time left
+        """
         print('Here is the state update:', data['message'])
         self.players = [Player(Position(position['x'], position['y']), MoveDirection.__dict__[position['direction'].upper()]) for position in
                         data['message']['players']]
@@ -106,43 +191,92 @@ class GameClientContext(ConnectionListener):
         self.time_left = float(data['message']['time_left'])
 
     def Network_score(self, data):
+        """
+        Precondition:
+            - data contains a valid score
+
+        Postcondition:
+            - Updates current score and sets server as not playing
+        """
         self.score = data['score']
         self._is_server_playing_game = False
 
     def Network_connected(self, data):
+        """
+        Postcondition:
+            - Logs successful server connection
+        """
         print('You are now connected to the server')
 
     def Network_error(self, data):
+        """
+        Precondition:
+            - data contains error details
+
+        Postcondition:
+            - Logs error and disconnects client
+        """
         print('error:', data['error'])
         connection.Close()
         self.is_disconnected = True
 
     def Network_moved(self, data):
+        """
+        Postcondition:
+            - Plays move sound if sound is enabled
+        """
         if self.is_sound_enabled:
             Sound.move.play()
 
     def Network_picture_taken(self, data):
+        """
+        Postcondition:
+            - Plays photo sound if sound is enabled
+        """
         if self.is_sound_enabled:
             Sound.take_photo.play()
 
     def Network_disconnected(self, data):
+        """
+        Postcondition:
+            - Logs disconnect and updates state
+        """
         print('Server disconnected')
         self.is_disconnected = True
 
     def Disconnect(self):
+        """
+        Postcondition:
+            - Closes the connection
+        """
         connection.Close()
 
     @property
     def is_server_playing_game(self):
+        """
+        Postcondition:
+            - Returns the server's playing status
+        """
         return self._is_server_playing_game
 
     @is_server_playing_game.setter
     def is_server_playing_game(self, value):
+        """
+        Precondition:
+            - value is a boolean
+
+        Postcondition:
+            - Updates the server playing status
+        """
         self._is_server_playing_game = value
 
 
 class GameContext:
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes game window, clock, and sound settings
+        """
         self.client_config = GameClientConfig()
         self.client_context: GameClientContext | None = None
 
@@ -158,55 +292,117 @@ class GameContext:
 
     @property
     def is_running(self) -> bool:
+        """
+        Postcondition:
+            - Returns whether the game is currently running
+        """
         return self._is_running
 
     @is_running.setter
     def is_running(self, value):
+        """
+        Precondition:
+            - value is a boolean
+
+        Postcondition:
+            - Updates the game running status
+        """
         self._is_running = value
 
 
 class GameState(ABC):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes the transition request as None
+        """
         self._transition_request: type[GameState] | None = None
 
     @abstractmethod
     def enter(self, old_state: type['GameState'] | None, context: GameContext) -> None:
+        """
+        Precondition:
+            - context is a valid GameContext object
+        Postcondition:
+            - Performs logic necessary when entering a game state
+        """
         pass
 
     @abstractmethod
     def exit(self, context: GameContext) -> None:
+        """
+        Precondition:
+            - context is a valid GameContext object
+        Postcondition:
+            - Performs logic necessary when exiting a game state
+        """
         pass
 
     @abstractmethod
     def handle_events(self, events: list[Event], context: GameContext) -> None:
+        """
+        Precondition:
+            - events is a list of Pygame events
+            - context is a valid GameContext object
+        Postcondition:
+            - Processes relevant events for the current game state
+        """
         pass
 
     @abstractmethod
     def update(self, dt: float, context: GameContext) -> None:
+        """
+        Precondition:
+            - dt is the delta time (float), context is valid GameContext
+        Postcondition:
+            - Updates the game state logic based on elapsed time
+        """
         pass
 
     @abstractmethod
     def render(self, context: GameContext) -> None:
+        """
+        Precondition:
+            - context is a valid GameContext object
+        Postcondition:
+            - Renders the visual state to the screen
+        """
         pass
 
     @property
     def transition_request(self):
+        """
+        Postcondition:
+            - Returns the requested transition target (if any)
+        """
         return self._transition_request
 
 
 class Scores:
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes score file path and resets score dictionary
+        """
         self.score_file = GameClientConfig.SCORE_FILE
 
         self.level_scores: dict[str, int] = {}
         self.reset_scores()
 
     def reset_scores(self):
+        """
+        Postcondition:
+            - Resets scores for all levels to 0
+        """
         self.level_scores = {}  # {level_number: highest_score}
         for level in range(GameConfig.MIN_LEVEL, GameConfig.MAX_LEVEL + 1, 1):
             self.level_scores[f'{level}'] = 0
 
     def load_scores(self):
+        """
+        Postcondition:
+            - Loads scores from file if present; else resets and saves scores
+        """
         self.level_scores = {}
         if os.path.exists(self.score_file):
             try:
@@ -219,6 +415,10 @@ class Scores:
             self.save_scores()
 
     def save_scores(self):
+        """
+        Postcondition:
+            - Saves the current scores to disk in JSON format
+        """
         try:
             with open(self.score_file, 'w') as f:
                 # Ensure keys are strings for JSON compatibility
@@ -227,16 +427,32 @@ class Scores:
             print('Error saving scores:', e)
 
     def get(self, level: int) -> int:
+        """
+        Precondition:
+            - GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
+        Postcondition:
+            - Returns high score for the given level
+        """
         assert GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
         return self.level_scores[str(level)]
 
     def set_high_score(self, level: int, score: int) -> None:
+        """
+        Precondition:
+            - GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
+        Postcondition:
+            - Sets the new high score if it's higher than the existing one
+        """
         assert GameClientConfig.MIN_LEVEL <= level <= GameClientConfig.MAX_LEVEL
         self.level_scores[str(level)] = max(score, self.level_scores[str(level)])
 
 
 class MainMenuState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes all menu buttons with correct positions and labels
+        """
         super().__init__()
 
         self.center_x = GameClientConfig.WINDOW_WIDTH // 2
@@ -248,12 +464,30 @@ class MainMenuState(GameState):
         self.exit_button = Button('Exit', button_x, 500)
 
     def enter(self, old_state: GameState, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Ready to display main menu
+        """
         assert context.client_context is None
 
     def exit(self, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Leaves the main menu state
+        """
         assert context.client_context is None
 
     def handle_events(self, events: list[Event], context: GameContext) -> None:
+        """
+        Precondition:
+            - events is a list of Pygame events
+        Postcondition:
+            - Sets transition request based on clicked button
+        """
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
@@ -270,6 +504,10 @@ class MainMenuState(GameState):
         pass
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Renders menu title, version, and buttons
+        """
         # Draw title
         title_text = GameFont.heading1_font.render('Deer Picture Hunting', True, Color.BLACK)
         title_rect = title_text.get_rect(center=(self.center_x, 80))
@@ -292,6 +530,10 @@ class MainMenuState(GameState):
 
 class HighScoreMenuState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes score display and control buttons
+        """
         super().__init__()
         self.scores = Scores()
         self.scores.load_scores()
@@ -301,12 +543,28 @@ class HighScoreMenuState(GameState):
         self.reset_button = Button('Reset', center_x + DefaultButtonConfig.default_width // 2 + 10, 500)
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Ready to show high scores
+        """
         assert context.client_context is None
 
     def exit(self, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Leaves high score menu
+        """
         assert context.client_context is None
 
     def handle_events(self, events: list[Event], context: GameContext) -> None:
+        """
+        Postcondition:
+            - Handles back/reset button clicks
+        """
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
@@ -320,6 +578,10 @@ class HighScoreMenuState(GameState):
         pass
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Renders all high scores and buttons
+        """
         # Draw title
         title_text = GameFont.heading1_font.render('High Scores', True, Color.BLACK)
         title_rect = title_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 60))
@@ -345,6 +607,10 @@ class HighScoreMenuState(GameState):
 
 class OptionsMenuState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes back and sound toggle buttons
+        """
         super().__init__()
         center_x = GameClientConfig.WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
 
@@ -352,12 +618,28 @@ class OptionsMenuState(GameState):
         self.sound_toggle_button = Button('Sound: On', center_x, 250)
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Ready to show options menu
+        """
         assert context.client_context is None
 
     def exit(self, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Leaves options menu
+        """
         assert context.client_context is None
 
     def handle_events(self, events: list[pygame.event.Event], context: GameContext) -> None:
+        """
+        Postcondition:
+            - Handles back and sound toggle interactions
+        """
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
@@ -370,6 +652,10 @@ class OptionsMenuState(GameState):
         pass
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Draws title and buttons for options
+        """
         title_text = GameFont.heading1_font.render('Options', True, Color.BLACK)
         title_rect = title_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 60))
         context.screen.blit(title_text, title_rect)
@@ -382,6 +668,10 @@ class OptionsMenuState(GameState):
 
 class ServerSelectionMenuState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes input field and menu buttons for server selection
+        """
         super().__init__()
         center_x = GameClientConfig.WINDOW_WIDTH // 2 - DefaultButtonConfig.default_width // 2
 
@@ -397,12 +687,22 @@ class ServerSelectionMenuState(GameState):
         self.join_button.disable()
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is None
+        Postcondition:
+            - Ready to enter server address
+        """
         assert context.client_context is None
 
     def exit(self, context: GameContext) -> None:
         pass
 
     def handle_events(self, events: list[pygame.event.Event], context: GameContext) -> None:
+        """
+        Postcondition:
+            - Handles typing and button interactions
+        """
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
@@ -430,6 +730,10 @@ class ServerSelectionMenuState(GameState):
         pass
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Renders input field, entered text, and control buttons
+        """
         pygame.draw.rect(
             context.screen,
             (0, 0, 0),
@@ -458,6 +762,10 @@ class ServerSelectionMenuState(GameState):
 
 class LevelSelectionMenuState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes level selection buttons and back button
+        """
         super().__init__()
         columns = 5
         spacing = 10
@@ -486,12 +794,22 @@ class LevelSelectionMenuState(GameState):
             ))
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is not None
+        Postcondition:
+            - Ready to select level
+        """
         assert context.client_context is not None
 
     def exit(self, context: GameContext) -> None:
         pass
 
     def handle_events(self, events: list[pygame.event.Event], context: GameContext) -> None:
+        """
+        Postcondition:
+            - Processes button clicks for level selection or going back
+        """
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
@@ -505,6 +823,10 @@ class LevelSelectionMenuState(GameState):
                         self._transition_request = PlayingState
 
     def update(self, dt: float, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Updates connection and transitions if map is ready or disconnected
+        """
         if context.client_context is None:
             return
 
@@ -517,6 +839,10 @@ class LevelSelectionMenuState(GameState):
             self._transition_request = PlayingState
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Renders level buttons and title
+        """
         title_text = GameFont.heading1_font.render("Choose Level", True, Color.BLACK)
         title_rect = title_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, 60))
         context.screen.blit(title_text, title_rect)
@@ -527,20 +853,38 @@ class LevelSelectionMenuState(GameState):
 
 class PlayingState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Stores previous frame rate for later restoration
+        """
         super().__init__()
         self.previous_frame_rate: int = GameClientConfig.FRAME_RATE
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is not None
+        Postcondition:
+            - Switches to fast game loop and sets game as playing
+        """
         assert context.client_context is not None
         self.previous_frame_rate = context.frame_rate
         context.client_context.is_server_playing_game = True
         context.frame_rate = 60
 
     def exit(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Restores original frame rate
+        """
         # assert context.client_context is not None
         context.frame_rate = self.previous_frame_rate
 
     def handle_events(self, events: list[Event], context: GameContext) -> None:
+        """
+        Postcondition:
+            - Handles movement and picture taking
+        """
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -557,6 +901,10 @@ class PlayingState(GameState):
             context.client_context.send_move(MoveDirection.RIGHT)
 
     def update(self, dt: float, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Pumps state and transitions to game over or main menu if needed
+        """
         if context.client_context is None:
             return
 
@@ -570,6 +918,10 @@ class PlayingState(GameState):
             self._transition_request = MainMenuState
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Draws game world and UI elements (score, time)
+        """
         if context.client_context is None:
             return
         if context.client_context.map is None:
@@ -592,28 +944,54 @@ class PlayingState(GameState):
 
 class GameOverState(GameState):
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes score system for game over screen
+        """
         super().__init__()
         self.center_y = GameClientConfig.WINDOW_HEIGHT // 2
         self.scores = Scores()
         self.scores.load_scores()
 
     def enter(self, old_state: type[GameState] | None, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Stores and saves high score
+        """
         self.scores.set_high_score(context.client_context.level, context.client_context.score)
         self.scores.save_scores()
         assert context.client_context is not None
 
     def exit(self, context: GameContext) -> None:
+        """
+        Precondition:
+            - context.client_context is not None
+        Postcondition:
+            - Final cleanup before transitioning
+        """
         assert context.client_context is not None
 
     def handle_events(self, events: list[pygame.event.Event], context: GameContext) -> None:
+        """
+        Postcondition:
+            - Waits for any input and then transitions to level selection
+        """
         for event in events:
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 self._transition_request = LevelSelectionMenuState
 
     def update(self, dt: float, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Updates game client network state
+        """
         context.client_context.pump()
 
     def render(self, context: GameContext) -> None:
+        """
+        Postcondition:
+            - Renders final score and message
+        """
         game_over_text = GameFont.heading1_font.render('GAME OVER', True, Color.BLACK)
         game_over_text_rect = game_over_text.get_rect(center=(GameClientConfig.WINDOW_WIDTH // 2, GameClientConfig.WINDOW_HEIGHT // 2 - 50))
         context.screen.blit(game_over_text, game_over_text_rect)
@@ -634,6 +1012,10 @@ class GameOverState(GameState):
 
 class Game:
     def __init__(self):
+        """
+        Postcondition:
+            - Initializes Pygame and game subsystems
+        """
         pygame.init()
         pygame.mixer.init()
 
@@ -648,6 +1030,10 @@ class Game:
         self._passed_time = 0
 
     def update(self):
+        """
+        Postcondition:
+            - Processes events, updates game logic, renders, and handles state transitions
+        """
         # handle_events
         events = pygame.event.get()
         for event in events:
@@ -678,11 +1064,19 @@ class Game:
         self._passed_time = self.context.clock.tick(self.context.frame_rate)
 
     def shutdown(self):
+        """
+        Postcondition:
+            - Performs final cleanup of game state
+        """
         if self.current_state:
             self.current_state.exit(self.context)
         print('State machine shutdown')
 
     def run(self):
+        """
+        Postcondition:
+            - Runs main game loop until the game is stopped
+        """
         while self.context.is_running:
             self.update()
 
